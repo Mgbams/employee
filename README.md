@@ -190,9 +190,11 @@ imports: [
 
 e.g
 
+```html
 <li>
   <a routerLink="create">Create</a>
 </li>
+```
 
 ## Add router-outlet to your app.component.html to enable routing
 
