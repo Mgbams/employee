@@ -14,6 +14,11 @@ Run `ng generate component component-name` to generate a new component. You can 
 
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
 
+## Resources
+
+To see a list of available resources we can use in our projects, visit
+[resources](https://angular.io/resources?category=development)
+
 ## Prerequisite
 
 - Angular cli
@@ -54,16 +59,69 @@ cd ProjectName   //This changes to the new project directory
 code .   //This opens it in vscode
 ```
 
-## Install bootstrap
+## Install ngx-bootstrap
 
 ```bash
-$ npm install bootstrap@3
+$ npm install ngx-bootstrap --save
+$ npm install bootstrap@3  --save
 ```
 
 Add botstrap to **angular.json** fileunder the styles section as shown below
 
 ```json
 "node_modules/bootstrap/dist/css/bootstrap.min.css"
+```
+
+E.g To use a datepicker module from ngx-bootstrap, you can import it as follows
+
+```ts
+//app.module.ts
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations'; //necessary import
+import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
+//Add both to imports section and call forRoot() method on BsDatepickerModule
+imports: [
+    BrowserModule,
+    FormsModule,
+    ReactiveFormsModule,
+    BrowserAnimationsModule,
+    BsDatepickerModule.forRoot(),
+  ],
+```
+
+Then in **angular.json** file, add the ngx-bootstrap css and the datepicker css in the styles section. You will need add the css of other imported components if you do import other components like accordion e.t.c
+
+```json
+//angular.json
+ "styles": [
+    "src/styles.sass",
+    "node_modules/bootstrap/dist/css/bootstrap.min.css",
+    "node_modules/ngx-bootstrap/datepicker/bs-datepicker.css"
+  ],
+```
+
+To use the ngx-bootstrap datepicker in your component.html, see example below
+
+```html
+//The type is defined as text to avoid using the default date type of html // We
+add bsDatepicker as a property of the input to call the datepicker component
+here
+<input
+  type="text"
+  bsDatepicker
+  id="dateOfBirth"
+  name="dateOfBirth"
+  ngModel
+  class="form-control"
+/>
+```
+
+**NOTE:** bsDaterangepicker is for a date range while bsDatepicker is for a single date picker. So choosewhich to use as you desire
+After this modifications, stop your server and re-run it.
+
+To modify the default configuration of datepicker, you import this into your component.ts
+
+```ts
+import { BsDatepickerConfig } from "ngx-bootstrap/datepicker";
 ```
 
 ## Launch project with
@@ -186,7 +244,7 @@ imports: [
 
 ## Template Driven forms
 
-The inputs must have an ngModel attribute and the form element must have an ngForm assigned to and id that references it e.g
+The inputs must have an ngModel attribute and the form element must have an ngForm assigned to an id that references it e.g
 
 ```html
 <form #employeeForm="ngForm" (ngSubmit)="saveEmployee(employeeForm)">
@@ -202,7 +260,7 @@ The inputs must have an ngModel attribute and the form element must have an ngFo
           type="text"
           id="fullName"
           name="fullName"
-          [(ngModel)]="fullName"
+          ngModel
           class="form-control"
         />
       </div>
@@ -213,7 +271,7 @@ The inputs must have an ngModel attribute and the form element must have an ngFo
           type="text"
           id="email"
           name="email"
-          [(ngModel)]="email"
+          ngModel
           class="form-control"
         />
       </div>
@@ -223,6 +281,39 @@ The inputs must have an ngModel attribute and the form element must have an ngFo
     </div>
   </div>
 </form>
+```
+
+**IMPORTANT** When you use databinding in your html e.g [(ngModel)]="gender", you are binding to the gender variable declared in your .ts file and you should declare the default value for gender there e.g
+
+```html
+<input
+  type="radio"
+  value="gender"
+  id="gender"
+  name="gender"
+  ngModel
+  [(ngModel)]="gender"
+/>
+```
+
+Then in your component.ts file
+
+```ts
+gender = "male";
+```
+
+And when you bind to a checkbox or a radio button this way that means you are checking it by default.
+
+But when you're not binding, it's enough to use just **ngModel** in your input e.g
+
+```html
+<input
+  type="text"
+  id="phoneNumber"
+  name="phoneNumber"
+  ngModel
+  class="form-control"
+/>
 ```
 
 **NOTE:** I can use interpolation on my page to see the contents of the forms when i type into it as shown below: employeeForm is the id on the form element.
@@ -240,3 +331,21 @@ console.log(empForm.value);
 
 **NOTE** The function employeeForm is called by refernce and not invoked i. e
 **(ngSubmit)="saveEmployee(employeeForm)**
+
+## By Default Browser validation is disabled after angular 2
+
+Angular now adds novalidate to a form tag making browser validation not to work. e.g
+If you add a required attribute of an input element, it will not work because when our form is generated, we see a novalidate attribute added to it when we view it through the console. But if you wish to enable browser validation by default, then add this module to your form i.e
+
+```html
+<form ngNativeValidate>
+  //This now will work
+  <input name="fullname" type="tex" required />
+</form>
+```
+
+To disable browser validation in angular 2, add novalidate to the form tag i.e
+
+```html
+novalidate
+```
