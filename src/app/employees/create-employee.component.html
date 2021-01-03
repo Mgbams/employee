@@ -11,7 +11,8 @@
           type="text"
           id="fullName"
           name="fullName"
-          [(ngModel)]="fullName"
+          ngModel
+          #fullName="ngModel"
           class="form-control"
         />
       </div>
@@ -22,9 +23,25 @@
           type="text"
           id="email"
           name="email"
-          [(ngModel)]="email"
+          ngModel
+          #email="ngModel"
           class="form-control"
         />
+      </div>
+
+      <div class="form-group">
+        <label for="email">Gender</label>
+        <div class="form-control">
+          <label for="male">
+            <input type="radio" value="male" id="male" />
+            Male
+          </label>
+
+          <label for="female">
+            <input type="radio" value="female" id="female" />
+            Male
+          </label>
+        </div>
       </div>
     </div>
     <div class="panel-footer">
