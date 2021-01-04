@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import {  Department } from '../models/department.model';
 import { BsDatepickerConfig } from 'ngx-bootstrap/datepicker';
+import {Employee} from '../models/employee.models';
 
 @Component({
   selector: 'app-create-employee',
@@ -10,11 +11,22 @@ import { BsDatepickerConfig } from 'ngx-bootstrap/datepicker';
 })
 export class CreateEmployeeComponent implements OnInit {
   datePickerConfig: Partial<BsDatepickerConfig>;
-  isActive = true;
+  /* isActive = true;
   department = 3;
-  dateOfBirth: Date = new Date(2018, 0, 30); // default date
+  dateOfBirth: Date = new Date(2018, 0, 30); // default date */
   previewPhoto = false;
-  photoPath: "";
+  employee: Employee = {
+    id: null,
+    name: null,
+    gender: null,
+    email: null,
+    phoneNumber: null,
+    contactPreference: null,
+    dateOfBirth: null,
+    department: null,
+    isActive:  null,
+    photoPath: null,
+  }
   departments: Department[] = [
     {
       id: 1,
@@ -43,18 +55,18 @@ export class CreateEmployeeComponent implements OnInit {
     // so Angular can catch object reference change
     this.datePickerConfig = Object.assign({}, { 
       containerClass: 'theme-dark-blue', 
-      showWeekNumbers: false,
+     /*  showWeekNumbers: false,
       minDate: new Date(2018, 0, 1), // 0 is for january
       maxDate: new Date(2018, 11, 31),  // 11 is for december
-      dateInputFormat: 'MM/DD/YYYY'
+      dateInputFormat: 'MM/DD/YYYY' */
     });
    }
 
   ngOnInit(): void {
   }
 
-  saveEmployee(empForm: NgForm): void {
-    console.log(empForm);
+  saveEmployee(newEmployee: Employee): void {
+    console.log(newEmployee);
   }
 
   togglePreview() {

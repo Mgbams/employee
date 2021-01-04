@@ -351,3 +351,145 @@ To disable browser validation in angular 2, add novalidate to the form tag i.e
 ```html
 novalidate
 ```
+
+## Form validation
+
+We validate forms around the following
+
+- touched: When you've touched the form element and it activates when the element looses focus
+- untouched: when the element has not yet received focus it is untouched
+- pristine: when the element has not been changed
+- dirty: when the element has been changed then it is true
+- valid: it is true when the element has a content
+- invalid: it is false when the element is empty
+
+> To validate a form element, add a reference to it and assign it to ngModel. the reference name must be unique in the form, so i usually adding control to the name e.g
+
+```html
+<input
+  required
+  type="text"
+  id="fullName"
+  name="fullName"
+  ngModel
+  #fullNameControl="ngModel"
+  class="form-control"
+/>
+
+<div>touched: {{ fullNameControl.touched }}</div>
+<div>Untouched: {{ fullNameControl.untouched }}</div>
+```
+
+From the above, i added #fullNameControl="ngModel" to the input field to reference firstname input and below it i checked if it has been touched or untouched using its reference i.E
+
+```html
+{{ fullNameControl.touched }}
+```
+
+**STEPS**
+
+- Include the HTML5 validation attribute such as required e.g
+
+```html
+<input required type="text" id="fullName" name="fullName" ngModel required />
+```
+
+- export ngModel directive to a local template variable e.g **#fullNameControl="ngModel"**
+
+```html
+<input
+  required
+  type="text"
+  id="fullName"
+  name="fullName"
+  required
+  ngModel
+  #fullNameControl="ngModel"
+/>
+```
+
+- Use the local template variable to access the validation properties (touched, untouched, valid, invalid, pristine, dirty) e.g
+
+```html
+{{ fullNameControl.untouched }}
+```
+
+## Bootstrap classes for handling error
+
+- has-error
+- control-label
+- help-block
+- has-success
+  e.g My basic usage of the error classes
+
+```html
+<div
+  class="form-group"
+  [class.has-error]="fullNameControl.invalid && fullNameControl.touched"
+>
+  <label for="fullName" class="control-label">Full Name</label>
+  <input
+    required
+    type="text"
+    id="fullName"
+    name="fullName"
+    ngModel
+    #fullNameControl="ngModel"
+    class="form-control"
+  />
+  <span
+    class="help-block"
+    *ngIf="fullNameControl.invalid && fullNameControl.touched"
+    >invalid email</span
+  >
+</div>
+```
+
+## Two ways of validating email
+
+- pattern validator
+  using pattern example
+
+```html
+<input
+  type="text"
+  id="email"
+  name="email"
+  required
+  pattern="^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-A0-9-.]+$"
+  ngModel
+  [(ngModel)]="employee.email"
+  #email="ngModel"
+  class="form-control"
+/>
+<span class="help-block" *ngIf="email.errors?.required && email.touched"
+  >Email is required</span
+>
+<span class="help-block" *ngIf="email.errors?.pattern && email.touched"
+  >Invalid Email</span
+>
+```
+
+- email validator
+
+  using email validator example
+
+  ```html
+  <input
+    type="text"
+    id="email"
+    name="email"
+    required
+    email
+    ngModel
+    [(ngModel)]="employee.email"
+    #email="ngModel"
+    class="form-control"
+  />
+  <span class="help-block" *ngIf="email.errors?.required && email.touched"
+    >Email is required</span
+  >
+  <span class="help-block" *ngIf="email.errors?.email && email.touched"
+    >Invalid Email</span
+  >
+  ```
