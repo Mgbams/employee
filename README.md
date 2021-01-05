@@ -493,3 +493,96 @@ From the above, i added #fullNameControl="ngModel" to the input field to referen
     >Invalid Email</span
   >
   ```
+
+  ## ngValue vs value properties
+
+  The required attribute on a select item that has some validation written for it will only work when the deafult selected option is null and we set it to null using the ngValue syntax below
+
+  Basic usage of ngValue could be to set the default option of a select option e.g
+
+  ```html
+  <option [ngValue]="null">Select department</option>
+  ```
+
+  Other usage examples include:
+
+  ```html
+  //value usage: This will give you the id of the selected item
+  <option *ngFor="let department of departments" [value]="department.id">
+    {{department.name}}
+  </option>
+
+  //ngValue usage: This will give you an object collection of the selected item
+
+  <option *ngFor="let department of departments" [ngValue]="department">
+    {{department.name}}
+  </option>
+  ```
+
+  ## Custom Validator
+
+  - Create a shared folder, create your directive file in your shared folder with an extension of directive.ts e.g email-validator.directive.ts
+  - write your logic in it
+    e.g
+
+  ```ts
+  import { Directive, Input } from "@angular/core";
+  import { AbstractControl, NG_VALIDATORS, Validators } from "@angular/forms";
+
+  @Directive({
+    selector: "[appSelectDirective]",
+    providers: [
+      {
+        provide: NG_VALIDATORS,
+        useExisting: SelectRequiredValidatorDirective,
+        multi: true /*to tell angular tha we want to add our validator to the lists of validators maitained by angular*/,
+      },
+    ],
+  })
+  export class SelectRequiredValidatorDirective implements Validators {
+    //It returns null when the validation succeeds.
+    //It returns an object of key and value if the validation fails
+    //control represents the element that is being passed into this directive for validation
+    // When using customer validator we don't need required attribute on our html element
+    //import it to your app.module.ts
+    // register it under declaration in app.module.ts
+    validate(control: AbstractControl): { [key: string]: any } | null {
+      return control.value === "-1" ? { defaultSelected: true } : null;
+    }
+  }
+  ```
+
+  - import it into **app.module.ts**
+
+  ```ts
+  import { SelectRequiredValidatorDirective } from "./shared/select-required-validator.directive";
+  ```
+
+  - Add it under the declaration section of **app.module.ts** e.g
+
+  ```ts
+  declarations: [
+   SelectRequiredValidatorDirective
+  ],
+  ```
+
+  - Use the directive selector on your html element that is to be validated
+
+  ```html
+  <select appSelectDirective>
+    <option ngValue="-1">Select department</option>
+    <option *ngFor="let department of departments" [value]="department.id">
+      {{ department.name }}
+    </option>
+  </select>
+  <span
+    class="help-block"
+    *ngIf="department.touched && department.errors?.defaultSelected"
+  >
+    Department is required
+  </span>
+  ```
+
+  ## Password and confirm password are examplesof cross-field validation
+
+  We can achieve their validation using custom-directive validation technique
