@@ -1,8 +1,4 @@
-<form
-  ngNativeValidate
-  #employeeForm="ngForm"
-  (ngSubmit)="saveEmployee(employee)"
->
+<form ngNativeValidate #employeeForm="ngForm" (ngSubmit)="saveEmployee()">
   <div class="panel panel-primary">
     <div class="panel-heading">
       <h3 class="panel-title">Create Employee</h3>
@@ -266,59 +262,67 @@
         />
       </div>
 
-      <div
-        class="form-group"
-        [class.has-error]="password.invalid && password.touched"
+      <!-- <div
+        ngModelGroup="passwordGroup"
+        #passwordGroup="ngModelGroup"
+        appConfirmEqualValidator="password"
+        [class.has-error]="
+          passwordGroup.errors?.notEqual && !confirmPassword.errors?.required
+        "
       >
-        <label for="name" class="control-label">Password</label>
-        <input
-          required
-          type="text"
-          id="password"
-          name="password"
-          ngModel
-          [(ngModel)]="employee.password"
-          #password="ngModel"
-          class="form-control"
-        />
-        <span
-          class="help-block"
-          *ngIf="password.errors?.required && password.touched"
-          >Password is required</span
+        <div
+          class="form-group"
+          [class.has-error]="password.invalid && password.touched"
         >
-      </div>
+          <label for="name" class="control-label">Password</label>
+          <input
+            required
+            type="text"
+            id="password"
+            name="password"
+            ngModel
+            [(ngModel)]="employee.password"
+            #password="ngModel"
+            class="form-control"
+          />
+          <span
+            class="help-block"
+            *ngIf="password.errors?.required && password.touched"
+            >Password is required</span
+          >
+        </div>
 
-      <div
-        class="form-group"
-        [class.has-error]="confirmPassword.invalid && confirmPassword.touched"
-      >
-        <label for="name" class="control-label">Confirm Password</label>
-        <input
-          required
-          type="text"
-          id="confirmPassword"
-          name="confirmPassword"
-          appConfirmEqualValidator="password"
-          ngModel
-          [(ngModel)]="employee.confirmPassword"
-          #confirmPassword="ngModel"
-          class="form-control"
-        />
-        <span
-          class="help-block"
-          *ngIf="confirmPassword.errors?.required && confirmPassword.touched"
-          >confirmPassword is required</span
+        <div
+          class="form-group"
+          [class.has-error]="confirmPassword.invalid && confirmPassword.touched"
         >
-        <span
-          class="help-block"
-          *ngIf="
-            confirmPassword.errors?.notEqual &&
-            confirmPassword.touched &&
-            !confirmPassword.errors?.required
-          "
-          >Confirm password and password do not match</span
-        >
-      </div>
+          <label for="name" class="control-label">Confirm Password</label>
+          <input
+            required
+            type="text"
+            id="confirmPassword"
+            name="confirmPassword"
+            ngModel
+            [(ngModel)]="employee.confirmPassword"
+            #confirmPassword="ngModel"
+            class="form-control"
+          />
+          <span
+            class="help-block"
+            *ngIf="confirmPassword.errors?.required && confirmPassword.touched"
+            >confirmPassword is required</span
+          >
+          <span
+            class="help-block"
+            *ngIf="
+              passwordGroup.errors?.notEqual &&
+              confirmPassword.touched &&
+              !confirmPassword.errors?.required
+            "
+            >Confirm password and password do not match</span
+          >
+        </div>
+      </div> -->
     </div>
     <div class="panel-footer">
       <button

@@ -586,3 +586,164 @@ From the above, i added #fullNameControl="ngModel" to the input field to referen
   ## Password and confirm password are examplesof cross-field validation
 
   We can achieve their validation using custom-directive validation technique
+
+## Binding to change and input event
+
+- Binding to change event only gets the action triggered when the element has lost focus I.e either clicking on another elment or tabbing out of the element e.g
+
+```html
+<input
+  required
+  type="text"
+  id="password"
+  name="password"
+  (change)="confirmPassword.control.updateValueAndValidity()"
+/>
+```
+
+- Binding to an input event gets triggered as we are typing directly into the element e.g
+
+```html
+<input
+  required
+  type="text"
+  id="password"
+  name="password"
+  (input)="confirmPassword.control.updateValueAndValidity()"
+/>
+```
+
+## First approach to password Validation; second approach is done on the form using ngModelGroup
+
+```html
+<div
+  ngModelGroup="passwordGroup"
+  #passwordGroup="ngModelGroup"
+  [class.has-error]="
+          confirmPassword.invalid &&
+          confirmPassword.touched &&
+          !confirmPassword.errors?.required
+        "
+>
+  <div
+    class="form-group"
+    [class.has-error]="password.invalid && password.touched"
+  >
+    <label for="name" class="control-label">Password</label>
+    <input
+      required
+      type="text"
+      id="password"
+      name="password"
+      (input)="confirmPassword.control.updateValueAndValidity()"
+      ngModel
+      [(ngModel)]="employee.password"
+      #password="ngModel"
+      class="form-control"
+    />
+    <span
+      class="help-block"
+      *ngIf="password.errors?.required && password.touched"
+      >Password is required</span
+    >
+  </div>
+
+  <div
+    class="form-group"
+    [class.has-error]="confirmPassword.invalid && confirmPassword.touched"
+  >
+    <label for="name" class="control-label">Confirm Password</label>
+    <input
+      required
+      type="text"
+      id="confirmPassword"
+      name="confirmPassword"
+      appConfirmEqualValidator="password"
+      ngModel
+      [(ngModel)]="employee.confirmPassword"
+      #confirmPassword="ngModel"
+      class="form-control"
+    />
+    <span
+      class="help-block"
+      *ngIf="confirmPassword.errors?.required && confirmPassword.touched"
+      >confirmPassword is required</span
+    >
+    <span
+      class="help-block"
+      *ngIf="
+              confirmPassword.errors?.notEqual &&
+              confirmPassword.touched &&
+              !confirmPassword.errors?.required
+            "
+      >Confirm password and password do not match</span
+    >
+  </div>
+</div>
+```
+
+> NgModelGroup directive is used to create a sub-group within a form.
+> It is useful for validating a subgroup of elements within a form.
+> useful to group properties of a form model into a nested object.
+> The name of the ngModelGroup will become the key for the nested object in the form model.
+> the ngModelGroup directive can only be used as a child of NgForm Directive.
+
+## SERVICES
+
+when you create a service you must register it in a module. if it is a service that is to be used by many components then you can register it in app.module.ts under providers. Then import it in the typescript file of your component and inject it in the controller e.g
+
+```ts
+//registering EmployeeService  service in app modules app.module.ts
+import { EmployeeService } from './employees/employee.service';
+providers: [EmployeeService]
+
+// using EmployeeService in my component
+import { EmployeeService } from './employee.service';
+constructor(private _employeeService: EmployeeService) { }
+```
+
+## using route direction from your component
+
+```ts
+import { Router } from '@angular/router';
+constructor(private _router: Router){}
+this._router.navigate(['routeName']);
+//Where routeName is the name of your route
+```
+
+## switchcase
+
+Switch case in angular is a combination of 3 directives:
+
+- ngSwitch
+- ngSwitchCase
+- ngSwitchDefault
+  Example usage in component.html
+
+```html
+<div class="col-xs-6" [ngSwitch]="employee.department">
+  <span *ngSwitchCase="1">Help Desk</span>
+  <span *ngSwitchCase="2">HR</span>
+  <span *ngSwitchCase="3">IT</span>
+  <span *ngSwitchCase="4">PayRoll</span>
+  <span *ngSwitchDefault>N/A</span>
+</div>
+```
+
+## Passing Data from PARENT to CHILD with @Input() decorator
+
+```ts
+// in the child component.ts
+import { modelName} from '../models/employee.models';
+@Input() employee: modelName; // here it is assumed a single instance of the model is passed to it at each time and not an array
+
+// in the parent.html
+<div class="panel panel-primary" *ngFor="let employee of employees">
+ <child-selector [employee]="employee"></child-selector>
+</div>
+```
+
+To detect and react to a change in an input property value changes, we use either
+
+- Property setter
+- ngOnChanges Life Cycle Hook
