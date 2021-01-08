@@ -1,3 +1,30 @@
+<h1 #h1Variable></h1>
 <div *ngFor="let employee of employees">
-  <app-display-employee [employee]="employee"></app-display-employee>
+  <div
+    (click)="h1Variable.innerHTML = childComponent.getEmployeeNameAndGender()"
+  >
+    <app-display-employee
+      [employee]="employee"
+      #childComponent
+    ></app-display-employee>
+  </div>
 </div>
+
+<!-- <button (click)="nextEmployee()" class="btn btn-primary">
+  View Next Employee</button
+><br /><br />
+<app-display-employee
+  [employee]="employeeToDisplay"
+  [employeeId]="employeeToDisplay.id"
+></app-display-employee> -->
+
+<!-- Used this template when passing data from child to parent using output decorator -->
+<!-- <h1 *ngIf="dataFromChild">
+  {{ dataFromChild.name + " " + dataFromChild.gender }}
+</h1>
+<div *ngFor="let employee of employees">
+  <app-display-employee
+    [employee]="employee"
+    (notify)="handleNotify($event)"
+  ></app-display-employee>
+</div> -->

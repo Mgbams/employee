@@ -8,11 +8,34 @@ import { EmployeeService } from './employee.service';
 })
 export class ListEmployeesComponent implements OnInit {
   employees: Employee[];
-
-  constructor(private _employeeService: EmployeeService) { }
+  // dataFromChild: Employee; //used it to store data when using output decorator from the child component
+  // employeeToDisplay: Employee;
+  // private arrayindex = 1;
+  constructor(private _employeeService: EmployeeService) {
+  
+   }
 
   ngOnInit(): void {
     this.employees = this._employeeService.getEmployees();
+    // this.employeeToDisplay = this.employees[0];
   };
 
+  
+  //used it to get data when using output decorator from the child component
+ /*  handleNotify(eventData: Employee) {
+    this.dataFromChild = eventData;
+  } */
+
+  // nextEmployee(): void {
+  //   if (this.arrayindex <= 2) {
+  //     this.employeeToDisplay = this.employees[this.arrayindex];
+  //     this.arrayindex++;
+  //   } else {
+  //      this.employeeToDisplay = this.employees[0];
+  //      this.arrayindex = 1;
+  //   }
+  // }
+
 }
+
+

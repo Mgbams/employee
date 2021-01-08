@@ -747,3 +747,163 @@ To detect and react to a change in an input property value changes, we use eithe
 
 - Property setter
 - ngOnChanges Life Cycle Hook
+  These are all used on the CHILD COMPONENT e.g
+
+## ngOnChanges
+
+- import it using
+
+```ts
+import { OnChanges, SimpleChanges } from "@angular/core";
+```
+
+- implement it on your component class as
+
+```ts
+export class DisplayEmployeeComponent implements OnInit, OnChanges {
+  @Input() employee: Employee;
+
+  //In this case, it monitors changes in the input element described above as employee
+  ngOnChanges(changes: SimpleChanges) {
+    // This method is called everytime an input property of this component changes
+    console.log(changes);
+    const previousEmployee = <Employee>changes.employee.previousValue; //type casting using <Employee>
+    const currentEmployee = <Employee>changes.employee.previousValue;
+
+    console.log(
+      "previous Employee :" +
+        (previousEmployee ? previousEmployee.name : "NULL")
+    );
+    console.log("current Employee :" + currentEmployee.name);
+  }
+}
+```
+
+## propertySetter with example
+
+```ts
+private _employee: Employee;
+   @Input()
+   set employee(val: Employee) {
+     console.log('Previous : ' + (this._employee ? this._employee.name : 'NULL')); // must always appear first in our code
+    console.log('Current : ' + val.name);
+     this._employee = val;
+   }
+
+   get employee(): Employee {
+     return this._employee;
+   }
+```
+
+Below is the binding on the parent
+
+```html
+<app-display-employee [employee]="employeeToDisplay"></app-display-employee>
+```
+
+## Differences between ngOnChanges and popertysetter
+
+- With ngOnChanges, we get all the changes instead of just the changes related to a single property.
+- ngOnChanges is very useful when multiple inputs to a child component changes
+
+WHILE
+
+- property setter is specific to a particular property and we only get changes of that particular property.
+- It is useful when you want to keep track of a single property or when you want to take different actions when different inputs change.
+
+## Transfer data from Child to Parent
+
+This can be achieved b either
+
+- template reference variable
+- Output decorator
+
+1. In this case we use an **Output decorator** on the child component e.g
+
+childComponent.ts
+
+```ts
+import { EventEmitter, OnInit, Output, SimpleChanges } from '@angular/core';
+
+ @Output() notify: EventEmitter<string> = new EventEmitter<string>();
+
+  handleClick() {
+    this.notify.emit(this.employee.name);
+  }
+```
+
+childComponent.html
+
+```html
+<div class="panel panel-primary" (click)="handleClick()"></div>
+```
+
+parentComponent.html
+
+Do an event binding on the attribute that handles the output which in this case is notify
+
+```html
+<div *ngFor="let employee of employees">
+  <app-display-employee (notify)="handleNotify($event)"></app-display-employee>
+</div>
+```
+
+**NOTE** The **$event** on the parent's html receives the event payload passed to the **emit** method inside the child's component.ts file.
+
+parentComponent.ts
+Define the function in the parent that handles this output. Which should be the same name as the name indicated on the childcomponent selector
+
+```ts
+   handleNotify(eventData: string) {
+
+  }
+```
+
+2. Here we are using template Reference variable
+   this is the simplest approach and is done on the parent component's html file e.g
+   STEPS:
+
+- Create the respective method and input decorator in the child's component.ts file e.g
+
+```ts
+ @Input() employee: Employee;
+
+ getEmployeeNameAndGender(): string {
+   return this.employee.name + ' ' + this.employee.gender;
+ }
+```
+
+- On the parent's html element, create a reference variable on the child element's selector e.g he we added #childComponent.
+  And with this reference we can access the contents of child's componenet.ts file
+  parent.html
+
+```html
+<h1 #h1Variable></h1>
+<div *ngFor="let employee of employees">
+  <div
+    (click)="h1Variable.innerHTML = childComponent.employee.name + ' ' + childComponent.employee.gender"
+  >
+    <app-display-employee
+      [employee]="employee"
+      #childComponent
+    ></app-display-employee>
+  </div>
+</div>
+```
+
+## ROUTE GUARDS
+
+There are severaly types of route fuards with different use cases e.g
+
+- CanDeactivate: It guards navigation away from the current route.
+- CanActivate: It guards navigation into a route.
+- CanActivateChild: it guards navigation into a child route.
+- CanLoad: It guards navigation to a feature module loaded asynchronously.
+
+* Resolve: It performs route data retrieval before route activation.
+
+## STEPS TO USE A ROUTE GUARD
+
+- Build the route guard
+- Register the guard with angular dependency injection system
+- Tie the guard to a route
