@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Employee } from '../models/employee.models';
 import { EmployeeService } from './employee.service';
-
+import { Router } from '@angular/router';
 @Component({
   templateUrl: './list-employees.component.html',
   styleUrls: ['./list-employees.component.sass']
@@ -11,7 +11,7 @@ export class ListEmployeesComponent implements OnInit {
   // dataFromChild: Employee; //used it to store data when using output decorator from the child component
   // employeeToDisplay: Employee;
   // private arrayindex = 1;
-  constructor(private _employeeService: EmployeeService) {
+  constructor(private _employeeService: EmployeeService, private _router: Router) {
   
    }
 
@@ -20,6 +20,9 @@ export class ListEmployeesComponent implements OnInit {
     // this.employeeToDisplay = this.employees[0];
   };
 
+  onClick(employeeId: number) {
+    this._router.navigate(['/employee', employeeId]);
+  }
   
   //used it to get data when using output decorator from the child component
  /*  handleNotify(eventData: Employee) {

@@ -71,9 +71,10 @@ export class CreateEmployeeComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  saveEmployee(): void {
+  saveEmployee(empForm: NgForm): void {
     //console.log();
     this._employeeService.save(this.employee);
+    empForm.reset(); //Reset your form before the navigation command
     this._router.navigate(['list']);
   }
 

@@ -494,98 +494,159 @@ From the above, i added #fullNameControl="ngModel" to the input field to referen
   >
   ```
 
-  ## ngValue vs value properties
+  ## Resetting your form when it is submitted
 
-  The required attribute on a select item that has some validation written for it will only work when the deafult selected option is null and we set it to null using the ngValue syntax below
-
-  Basic usage of ngValue could be to set the default option of a select option e.g
-
-  ```html
-  <option [ngValue]="null">Select department</option>
-  ```
-
-  Other usage examples include:
+  1. Add the reset method on the form e.g
+     **NOTE**: Add **templateReferenceVariable.reset()** to your form. Where template ReferenceVariable is the variable that represents your form. From below i called it **#employeeForm** so it will become **employeeForm.reset()**
 
   ```html
-  //value usage: This will give you the id of the selected item
-  <option *ngFor="let department of departments" [value]="department.id">
-    {{department.name}}
-  </option>
-
-  //ngValue usage: This will give you an object collection of the selected item
-
-  <option *ngFor="let department of departments" [ngValue]="department">
-    {{department.name}}
-  </option>
+  <form
+    ngNativeValidate
+    #employeeForm="ngForm"
+    (ngSubmit)="saveEmployee()"
+    employeeForm.reset()
+  ></form>
   ```
 
-  ## Custom Validator
+2.  OR you can reset it from your class which should be your prefered option i.e
 
-  - Create a shared folder, create your directive file in your shared folder with an extension of directive.ts e.g email-validator.directive.ts
-  - write your logic in it
-    e.g
+```html
+<form
+  ngNativeValidate
+  #employeeForm="ngForm"
+  (ngSubmit)="saveEmployee(employeeForm)"
+></form>
+```
 
-  ```ts
-  import { Directive, Input } from "@angular/core";
-  import { AbstractControl, NG_VALIDATORS, Validators } from "@angular/forms";
+```ts
+import { NgForm } from '@angular/forms';
 
-  @Directive({
-    selector: "[appSelectDirective]",
-    providers: [
-      {
-        provide: NG_VALIDATORS,
-        useExisting: SelectRequiredValidatorDirective,
-        multi: true /*to tell angular tha we want to add our validator to the lists of validators maitained by angular*/,
-      },
-    ],
-  })
-  export class SelectRequiredValidatorDirective implements Validators {
-    //It returns null when the validation succeeds.
-    //It returns an object of key and value if the validation fails
-    //control represents the element that is being passed into this directive for validation
-    // When using customer validator we don't need required attribute on our html element
-    //import it to your app.module.ts
-    // register it under declaration in app.module.ts
-    validate(control: AbstractControl): { [key: string]: any } | null {
-      return control.value === "-1" ? { defaultSelected: true } : null;
-    }
-  }
-  ```
+saveEmployee(empForm: NgForm): void {
+  //save it to your database: put the code here
+  empForm.reset(); //Reset your form before the navigation command
+   //navigate to another page after saving: put your code here
+}
+```
 
-  - import it into **app.module.ts**
+3.  OR you can use ViewChild method as shown below i.e
 
-  ```ts
-  import { SelectRequiredValidatorDirective } from "./shared/select-required-validator.directive";
-  ```
+```html
+<form
+  ngNativeValidate
+  #employeeForm="ngForm"
+  (ngSubmit)="saveEmployee()"
+></form>
+```
 
-  - Add it under the declaration section of **app.module.ts** e.g
+```ts
+import { NgForm } from '@angular/forms';
+@ViewChild('employeeForm') public createEmployeeForm: NgForm;
 
-  ```ts
-  declarations: [
-   SelectRequiredValidatorDirective
+saveEmployee(): void {
+  //save it to your database: put the code here
+  this.createEmployeeForm.reset(); //Reset your form before the navigation command
+
+   this.createEmployeeForm..reset({
+    name: 'testName',
+    contactPreference: 'phone'
+  }); // Setting value by default on form reset
+
+   //navigate to another page after saving: put your code here
+}
+```
+
+## ngValue vs value properties
+
+The required attribute on a select item that has some validation written for it will only work when the deafult selected option is null and we set it to null using the ngValue syntax below
+
+Basic usage of ngValue could be to set the default option of a select option e.g
+
+```html
+<option [ngValue]="null">Select department</option>
+```
+
+Other usage examples include:
+
+```html
+//value usage: This will give you the id of the selected item
+<option *ngFor="let department of departments" [value]="department.id">
+  {{department.name}}
+</option>
+
+//ngValue usage: This will give you an object collection of the selected item
+
+<option *ngFor="let department of departments" [ngValue]="department">
+  {{department.name}}
+</option>
+```
+
+## Custom Validator
+
+- Create a shared folder, create your directive file in your shared folder with an extension of directive.ts e.g email-validator.directive.ts
+- write your logic in it
+  e.g
+
+```ts
+import { Directive, Input } from "@angular/core";
+import { AbstractControl, NG_VALIDATORS, Validators } from "@angular/forms";
+
+@Directive({
+  selector: "[appSelectDirective]",
+  providers: [
+    {
+      provide: NG_VALIDATORS,
+      useExisting: SelectRequiredValidatorDirective,
+      multi: true /*to tell angular tha we want to add our validator to the lists of validators maitained by angular*/,
+    },
   ],
-  ```
+})
+export class SelectRequiredValidatorDirective implements Validators {
+  //It returns null when the validation succeeds.
+  //It returns an object of key and value if the validation fails
+  //control represents the element that is being passed into this directive for validation
+  // When using customer validator we don't need required attribute on our html element
+  //import it to your app.module.ts
+  // register it under declaration in app.module.ts
+  validate(control: AbstractControl): { [key: string]: any } | null {
+    return control.value === "-1" ? { defaultSelected: true } : null;
+  }
+}
+```
 
-  - Use the directive selector on your html element that is to be validated
+- import it into **app.module.ts**
 
-  ```html
-  <select appSelectDirective>
-    <option ngValue="-1">Select department</option>
-    <option *ngFor="let department of departments" [value]="department.id">
-      {{ department.name }}
-    </option>
-  </select>
-  <span
-    class="help-block"
-    *ngIf="department.touched && department.errors?.defaultSelected"
-  >
-    Department is required
-  </span>
-  ```
+```ts
+import { SelectRequiredValidatorDirective } from "./shared/select-required-validator.directive";
+```
 
-  ## Password and confirm password are examplesof cross-field validation
+- Add it under the declaration section of **app.module.ts** e.g
 
-  We can achieve their validation using custom-directive validation technique
+```ts
+declarations: [
+ SelectRequiredValidatorDirective
+],
+```
+
+- Use the directive selector on your html element that is to be validated
+
+```html
+<select appSelectDirective>
+  <option ngValue="-1">Select department</option>
+  <option *ngFor="let department of departments" [value]="department.id">
+    {{ department.name }}
+  </option>
+</select>
+<span
+  class="help-block"
+  *ngIf="department.touched && department.errors?.defaultSelected"
+>
+  Department is required
+</span>
+```
+
+## Password and confirm password are examplesof cross-field validation
+
+We can achieve their validation using custom-directive validation technique
 
 ## Binding to change and input event
 
@@ -907,3 +968,181 @@ There are severaly types of route fuards with different use cases e.g
 - Build the route guard
 - Register the guard with angular dependency injection system
 - Tie the guard to a route
+
+**Build the route guard**: below is an example of a route guard
+
+```ts
+import { Injectable } from "@angular/core";
+import { CanDeactivate } from "@angular/router";
+import { CreateEmployeeComponent } from "./create-employee.component";
+
+@Injectable()
+export class CreateEmployeeCanDeactivateGuardService
+  implements CanDeactivate<CreateEmployeeComponent> {
+  canDeactivate(component: CreateEmployeeComponent): boolean {
+    if (component.createEmployeeForm.dirty) {
+      return confirm("Are you sure you want to discard your changes ?");
+    }
+    return true;
+  }
+}
+```
+
+**Registering Route guard**: Open your module.ts file and import your guard, then add it in providers e.g
+app.module.ts
+
+```ts
+import { CreateEmployeeCanDeactivateGuardService } from './employees/create-employee-can-deactivate-guard.service';
+
+ providers: [CreateEmployeeCanDeactivateGuardService],
+```
+
+**Tying the guard to a route:** Here i am tying the guard to create route E.g
+
+```ts
+const appRoutes: Routes = [
+  {
+    path: "create",
+    component: CreateEmployeeComponent,
+    canDeactivate: [CreateEmployeeCanDeactivateGuardService], //Tying canDeactivate guard
+  },
+];
+```
+
+**NOTE**: canDeactivate route does not work when we are trying to access an external website like google.com, facebook.com e.tc. It does not also work when we type an address directly in our address bar. It also does not work when we click the close button of our window.
+
+## Routes wih parameters
+
+Steps:
+
+- Define the route and add the parameter name to be passes e.g
+
+```ts
+  {'path': 'employee/:id', component: EmployeeDetailsComponent},
+```
+
+- Pass the parameter to a function in your controller that handles the routing to the needed page e.g
+
+component.html
+
+```html
+<!--Here i am passing the id of the employee-->
+<div *ngFor="let employee of employees">
+  <div (click)="onClick(employee.id)">
+    <app-display-employee
+      [employee]="employee"
+      #childComponent
+    ></app-display-employee>
+  </div>
+</div>
+```
+
+- import Router and inject into your constructor, then define the function that handles routing to the page and pass it the parameter e.g
+
+Activating the route in a class
+
+```ts
+import { Router } from '@angular/router';
+ constructor(private _router: Router) {}
+ onClick(employeeId: number) {
+    this._router.navigate(['/employee', employeeId]); // passing the parameter
+  }
+```
+
+OR you can activate the route in a html file by binding to router link E.t.c
+
+```html
+<a [routerLink]="['/employees', 2]"></a>
+```
+
+## Reading passed parameters
+
+```ts
+import {ActivatedRoute } from '@angular/router';
+
+constructor(private _route: ActivatedRoute) { }
+ngOnInit(): void {
+  //Note the name passed to snapshot.params must be the same as the name passed as parameter during creation of your route. here it is id in both cases
+    //params are used for older versions of angular
+    const id = +this._route.snapshot.params['id']; // The plus converts the returned value to a number
+    // OR from ANGULAR 5 UPWARDS USE paraMap
+    const id = +this._route.snapshot.paramMap.get('id');
+  }
+```
+
+## Normal route to pages from html
+
+For normal routing we don not bind to the routeLink i.e when we are not passing parameters to our link we ue this below e.g
+
+```html
+<a routerLink="create">Create</a>
+```
+
+## When to use snapshot or observable approach
+
+- IF the route parameter value does not change and you only want to read the initial route parameter value.
+  e.g
+
+```ts
+employee: Employee;
+private _id: number;
+constructor(private _route: ActivatedRoute, private _employeeService: EmployeeService, private _router: Router) { }
+this._id = +this._route.snapshot.params['id']; // The plus converts the returned value to a number
+OR
+this._id = +this._route.snapshot.paramMap.get('id'); // from angular 4 upwards
+```
+
+- IF the route parameter value changes, and if you want to react and execute some code in response to that change. e.g
+
+```ts
+employee: Employee;
+private _id: number;
+constructor(private _route: ActivatedRoute, private _employeeService: EmployeeService, private _router: Router) { }
+ this._route.paramMap.subscribe(params => {
+  console.log(params);
+  this._id = +params.get('id');
+    console.log(this._id );
+    this.employee = this._employeeService.getEmployeeById(this._id);
+    console.log(this.employee);
+});
+```
+
+## Passing optional parameters to our link
+
+We can pass parameters optionally to our link by following the step below. But note that optionally passed parameters are not declared explicitly in the route definition of our path and we can pass as many parameters as we desire inside a curly braces e.g
+
+```html
+<!--Optionally passed parameters-->
+<a
+  href=""
+  class="btn btn-primary"
+  [routerLink]="['/list', { id: employee.id, name: employee.name }]"
+  >Back to list
+</a>
+```
+
+Optionally passed parameters appear after semi-colons in a route path e.g
+
+```url
+//Here **id** and **name** are optional parameters
+http://localhost:4200/list;id=3;name=Mary
+```
+
+## Conditionally adding classes
+
+```html
+<!--selectedEmployeeId is defined in the component.ts file-->
+<div
+  class="panel panel-primary"
+  [class.panel-success]="selectedEmployeeId === employee.id"
+></div>
+```
+
+## Differences between Required and optional route parameters
+
+- Required route parameters are part of the route configuration whereas optional route parameters are not.
+- Required route parameters are used in pattern matching whereas optional route parameters are not.
+
+* optional route parameters must be passed after the required route parameters if any.
+* prefer a required route parameter when the value is simple and mandatory E.g To view a specific employee details, the ID parameter is mandatory and it is a simple integer.
+* On the other hand, prefer an optional route parameter when the value is optional and complex.

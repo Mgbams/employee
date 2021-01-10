@@ -1,4 +1,9 @@
-<form ngNativeValidate #employeeForm="ngForm" (ngSubmit)="saveEmployee()">
+<form
+  ngNativeValidate
+  #employeeForm="ngForm"
+  (ngSubmit)="saveEmployee(employeeForm)"
+  employeeForm.reset()
+>
   <div class="panel panel-primary">
     <div class="panel-heading">
       <h3 class="panel-title">Create Employee</h3>
