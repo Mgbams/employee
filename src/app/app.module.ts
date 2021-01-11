@@ -10,12 +10,13 @@ import { EmployeeService } from './employees/employee.service';
 
 import { AppComponent } from './app.component';
 import { ListEmployeesComponent } from './employees/list-employees.component';
-import { CreateEmployeeComponent } from './employees/create-employee.component';
 import { AppRoutingModule } from './app-routing.module';
 import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
 import { DisplayEmployeeComponent } from './employees/display-employee.component';
 import { CreateEmployeeCanDeactivateGuardService } from './employees/create-employee-can-deactivate-guard.service';
 import { EmployeeDetailsComponent } from './employees/employee-details.component';
+import { CreateEmployeeComponent } from './employees/create-employee.component';
+import { EmployeeFilterPipe } from './employees/employee-filter.pipe';
 
 const appRoutes: Routes = [
   {'path': 'list', component: ListEmployeesComponent},
@@ -37,7 +38,8 @@ const appRoutes: Routes = [
     ConfirmEqualValidatorDirective,
     DisplayEmployeeComponent,
     EmployeeDetailsComponent,
-    EmployeeDetailsComponent 
+    EmployeeDetailsComponent,
+    EmployeeFilterPipe
   ],
   imports: [
     BrowserModule,

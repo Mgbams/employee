@@ -10,7 +10,7 @@ import { Employee } from '../models/employee.models';
 export class DisplayEmployeeComponent implements OnInit{
   
   @Input() employee: Employee;
-  private selectedEmployeeId: number;
+  selectedEmployeeId: number;
   constructor(private _route: ActivatedRoute) { }
 
   getEmployeeNameAndGender(): string {

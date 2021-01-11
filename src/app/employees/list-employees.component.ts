@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 })
 export class ListEmployeesComponent implements OnInit {
   employees: Employee[];
+  searchTerm: string;
   // dataFromChild: Employee; //used it to store data when using output decorator from the child component
   // employeeToDisplay: Employee;
   // private arrayindex = 1;
@@ -22,6 +23,13 @@ export class ListEmployeesComponent implements OnInit {
 
   onClick(employeeId: number) {
     this._router.navigate(['/employee', employeeId]);
+  }
+
+  changeEmployeeName() {
+    //this.employees[0].name = 'Jordan';
+    const newEmployeeArray: Employee[] = Object.assign([], this.employees);
+    newEmployeeArray[1].name = 'jordan';
+    this.employees = newEmployeeArray;
   }
   
   //used it to get data when using output decorator from the child component

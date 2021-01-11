@@ -1146,3 +1146,131 @@ http://localhost:4200/list;id=3;name=Mary
 * optional route parameters must be passed after the required route parameters if any.
 * prefer a required route parameter when the value is simple and mandatory E.g To view a specific employee details, the ID parameter is mandatory and it is a simple integer.
 * On the other hand, prefer an optional route parameter when the value is optional and complex.
+
+## using Object.assign() method to make a copy of an object
+
+e.g
+
+I used the Object.assign() method to make a copy of the contents of employee object to avoid loosing its content when i use the reset() method.
+
+```ts
+  saveEmployee(): void {
+    //console.log();
+    const newEmployee: Employee = Object.assign({}, this.employee); // copies the content of employee object and saves it to newEmployee
+    this._employeeService.save(newEmployee);
+    //empForm.reset(); //Reset your form before the navigation command
+    this.createEmployeeForm.reset();
+    this._router.navigate(['list']);
+  }
+```
+
+## FILTERING USING A PIPE
+
+this gives you the steps to filter items on the page
+**STEPS**
+
+1. Create a search box on your page e.g
+
+```html
+<div class="form-group">
+  <input
+    type="text"
+    class="form-control"
+    placeholder="Search By name"
+    style="width: 300px"
+  />
+</div>
+```
+
+2. Make a property binding to an attribute that will hold the searched string in your controller. E.g, In my controller, i will define an attribute called searchTerm and i will bind my search input to it using [(ngModel)]="searchTerm" e.g
+
+```ts
+searchTerm: string;
+```
+
+```html
+<div class="form-group">
+  <input
+    type="text"
+    class="form-control"
+    placeholder="Search By name"
+    style="width: 300px"
+    [(ngModel)]="searchTerm"
+  />
+</div>
+```
+
+3. Add a filter pipe i.e | to the items defined on your page and also define your custom filter e.g
+
+```html
+<div *ngFor="let employee of employees | employeeFilter: searchTerm"></div>
+```
+
+**NOTE:** From the above, i have **| employeeFilter: searchTerm**.
+
+- | : This is the pipe symbol
+- employeeFilter: This is the custom filter that will contain the logic to filter the employees.
+- searchTerm: this is the attribute in the component.ts that holds the searched terms.
+
+4. Create a filter and note to give it the same name as indicated above that is **employeeFilter** e.g
+
+employee-filter.pipe.ts
+
+```ts
+import { Pipe, PipeTransform } from "@angular/core";
+import { Employee } from "../models/employee.models";
+
+@Pipe({
+  name: "employeeFilter", // This name here must match with the name on the html form
+})
+export class EmployeeFilterPipe implements PipeTransform {
+  transform(employees: Employee[], searchTerm: string): Employee[] {
+    // If the searchterm does not exist or an employee does not match the seach term, then we return the employees displayed by default
+    if (!employees || !searchTerm) {
+      return employees;
+    }
+    //else, we convert employees name to lower case and searchterm to lowercase and if searched term is found we return the matched items.
+    return employees.filter(
+      (employee) =>
+        employee.name
+          .toLocaleLowerCase()
+          .indexOf(searchTerm.toLocaleLowerCase()) !== -1
+    );
+  }
+}
+```
+
+5. Finally, register this filter in a corresponding module. In this case i registered it in app.module.ts e.g
+
+app.module.ts
+
+```ts
+import { EmployeeFilterPipe } from './employees/employee-filter.pipe'; // it is imported here
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    EmployeeFilterPipe // it is registered here
+  ],
+})
+```
+
+**IMPORTANT:** We Have two types of pipes
+
+- pure pipe
+- impure pipe
+  We set the type of pipe by adding through or false to our pipe attribute e.g
+  By default, pipe is set to true meaning we have a pure pipe by default
+
+```ts
+@Pipe({
+  name: 'employeeFilter',
+  pipe: true
+  // pipe: false // This results in an impure pipe
+})
+```
+
+- A pure pipe is a pipe that is executed only when a pure change to the input value is detected.
+  - A pure change is either a change to a primitive input value(string, number, boolean) or a changed object reference(Array, Data, object).
+
+* An impure pipe runs even when no change is detected which makes it incovenient to be used in our programs as it consumes a lot of resources.

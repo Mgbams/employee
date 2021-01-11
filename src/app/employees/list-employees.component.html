@@ -1,4 +1,21 @@
-<div *ngFor="let employee of employees" class="pointerCursor">
+<div class="form-group">
+  <input
+    type="text"
+    class="form-control"
+    placeholder="Search By name"
+    style="width: 300px"
+    [(ngModel)]="searchTerm"
+  />
+</div>
+<div class="form-group">
+  <button (click)="changeEmployeeName()" class="btn btn-primary">
+    Change Employee Name
+  </button>
+</div>
+<div
+  *ngFor="let employee of employees | employeeFilter: searchTerm"
+  class="pointerCursor"
+>
   <div (click)="onClick(employee.id)">
     <app-display-employee
       [employee]="employee"
