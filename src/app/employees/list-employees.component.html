@@ -13,8 +13,9 @@
   </button>
 </div>
 <div
-  *ngFor="let employee of employees | employeeFilter: searchTerm"
+  *ngFor="let employee of filteredEmployees"
   class="pointerCursor"
+  (mousemove)="onMouseMove()"
 >
   <div (click)="onClick(employee.id)">
     <app-display-employee

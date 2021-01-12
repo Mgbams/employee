@@ -1273,4 +1273,217 @@ import { EmployeeFilterPipe } from './employees/employee-filter.pipe'; // it is 
 - A pure pipe is a pipe that is executed only when a pure change to the input value is detected.
   - A pure change is either a change to a primitive input value(string, number, boolean) or a changed object reference(Array, Data, object).
 
-* An impure pipe runs even when no change is detected which makes it incovenient to be used in our programs as it consumes a lot of resources.
+* An impure pipe runs on every change even when the source data does not change. this makes it incovenient to be used in our programs as it consumes a lot of resources.
+
+**IMPORTANT** The recommended approach is to move the filtering and sorting into our componbent itself so you have better control on what that code should and should not execute.
+
+## WHen the logic is moved to the component.ts file, we have our code as below
+
+The steps are:
+
+1.  Define a attribute to hold the filtered items: here it is **filteredEmployees: Employee[]**
+2.  Define an attribute to hold the searched term. here it is private \_searchTerm: string. Then add this attribute name to the input element that holds the search text on the html form i.e
+
+```html
+<!--Notice the data binding to the searchTerm attribute  [(ngModel)]="searchTerm"-->
+<div class="form-group">
+  <input
+    type="text"
+    class="form-control"
+    placeholder="Search By name"
+    style="width: 300px"
+    [(ngModel)]="searchTerm"
+  />
+</div>
+```
+
+3.  Define a setter and getter for the searched term. note i only removed the underscore from the name for the setter and getter to have **get serachTerm(){}** and **set serachTerm(){}**
+4.  Define a function to handle the logic: here i called it **filterEmployees(){}**
+
+component.ts
+
+```ts
+  employees: Employee[];
+  filteredEmployees: Employee[]; //We use this to  store filtered items
+  //searchTerm: string;
+  private _searchTerm: string;
+  get searchTerm(): string {
+    return this._searchTerm;
+  }
+
+  set searchTerm(value: string) {
+    this._searchTerm = value;
+    this.filteredEmployees = this.filterEmployees(value);
+  }
+
+  filterEmployees(searchedTerm: string) {
+     return this.employees.filter(employee =>
+            employee.name.toLocaleLowerCase().indexOf(searchedTerm.toLocaleLowerCase()) !== -1);
+  }
+```
+
+5. Assign the initial state of the filteredEmployees attribute to hold the list of all employyes onInit() e.g
+
+```ts
+ ngOnInit(): void {
+    this.employees = this._employeeService.getEmployees();
+    this.filteredEmployees = this.employees;
+    // this.employeeToDisplay = this.employees[0];
+  };
+```
+
+6. then in the component.html, loop through the filteredEmployees attribute instead of the employees attribute
+   i.e
+
+component.html
+
+```html
+<!--notice the loop at  *ngFor="let employee of filteredEmployees". It is filteredEmployees that is used here -->
+<div
+  *ngFor="let employee of filteredEmployees"
+  class="pointerCursor"
+  (mousemove)="onMouseMove()"
+></div>
+```
+
+## Query parameters on a route
+
+1. Query parameters appear on a route after the question mark(?). e.g
+   **http://localhost:4200/employees/3?name=me&id=4**
+   They are usually used when you want the parameters on the route to be optional and when you want to retain those parameters across multiple routes.
+2. Just like optional route parameters, query parameters are not part of the route configuration and therefore are not used in route pattern matching.
+   **USAGE IN COMPONENT.TS FILE**
+   To pass query parameter to a route in component.ts, we pass a second parameter to the route which is an object of key and value pairs and also another object with a key of queryParams E.g
+
+component.ts
+
+```ts
+ onClick(employeeId: number) {
+    this._router.navigate(['/employee', employeeId], {
+      queryParams: {
+        'searchTerm': this.searchTerm,
+        'testParam': 'testValue'
+      }
+    });
+  }
+```
+
+To preserve the query parameters through component.ts file, we add queryParamsHandling on the route navigate method of the function that our link calls to navigate to another page e.g
+
+```ts
+ viewNextEmployee() {
+    this._router.navigate(['/employee', this._id], {
+       queryParamsHandling:"preserve"
+    });
+  }
+
+```
+
+**USAGE IN COMPONENT.HTML FILE**
+We pass a binding to the queryParams attribute and pass it our object as shown below:
+
+```html
+<a
+  [routerLink]="['/employees']"
+  [queryParams]="{'searchTerm': 'john, 'testParam': 'testValue'}"
+  >List</a
+>
+```
+
+To preserve the query parameters, we add querParamsHandling propert to the button to be clicked to move to another page e.g
+
+```html
+<a [routerLink]="['/list']" queryParamsHandling="preserve">Back</a>
+```
+
+**NOTE:** The value for queryParamsHandling could either be **preserve** OR **merge**
+
+1. merge adds the query parameters of the current page i.e if the current page has route parameters, to the query parameters of the the page we will navigate to. E.g
+
+component A.html: And let's say the route to component A is **list**
+
+```html
+<a
+  [routerLink]="['/employees']"
+  [queryParams]="{'searchTerm': 'john, 'testParam': 'testValue'}"
+  >List</a
+>
+```
+
+component B.html: Let's say the route to component B is **employees**
+
+```html
+<a
+  [routerLink]="['/list']"
+  [queryParams]="{'newParams': 'mergedParams'}"
+  queryParamsHandling="merge"
+  >Back</a
+>
+```
+
+From the above two components, if i clicked on component A link tag, i will be directed to component B with the query parameters of component A appearing after the route name of component A i.e we will have a route as follows
+**http://localhost:4200/employees?searchTerm=john&testParam=testValue**.
+
+Now, since i have a queryParamsHandling="merge", it means when i click on the link on component B to return to component A, the query parameters of component B will be merged to the query parameters of compoent A i.e
+**http://localhost:4200/list?searchTerm=john&testParam=testValue&newParams=mergedParams**.
+
+**NOTE**: In Angular 2, we use preserveQueryParams instead.
+
+## How to read query string parameters
+
+In angular, we have three types of parameters, they are
+
+1. Optional parameters
+2. Required parameters
+3. Query parameters
+   The following methods are helpful when reading these parameters
+
+- has(name): it returns **true** if the parameter is found else it returns **false**. it is handy to check for optional or query parameters
+- get(name): it returns the **value** if the parameter is found. it returns **null** if it is not found.
+- getAll(name): it returns a string array of the parameter value if found. But if not found, it returns an empty array.
+
+* keys: It returns a string array of all the parameters.
+
+We read these parameters by importing and using **ActivatedRoute** in out ts file.
+
+Example to check for queryParams which handles query parameters and paraMap which handles optional and required parameters
+
+```ts
+import { ActivatedRoute } from '@angular/router';
+constructor(private _route: ActivatedRoute) {}
+
+ /*
+  ======================================================
+  Queryparameters uses queryParamMap api e.g
+  ======================================================
+ */
+
+ console.log(this._route.snapshot.queryParamMap.has('searchTerm')); // shows true if searchTerm exists as a parameter on the route e.g true
+ console.log(this._route.snapshot.queryParamMap.get('searchTerm')); // returns the value of searchTerm if searchTerm exists e.g 'John'
+ console.log(this._route.snapshot.queryParamMap.getAll('searchTerm')); // Returns an array of the contents of searchTerm e.g Array["john"]
+ console.log(this._route.snapshot.queryParamMap.keys);//returns an array of all the keys of the queryparameters e.g Array["searchTerm", "test"]
+
+
+ /*
+  ======================================================
+  Optional or Required parameters uses paraMap api e.g
+  ======================================================
+ */
+
+ console.log(this._route.snapshot.paramMap.has('searchTerm')); // shows true if searchTerm exists as a parameter on the route e.g true
+ console.log(this._route.snapshot.paramMap.get('searchTerm')); // returns the value of searchTerm if searchTerm exists e.g 'John'
+ console.log(this._route.snapshot.paramMap.getAll('searchTerm')); // Returns an array of the contents of searchTerm e.g Array["john"]
+ console.log(this._route.snapshot.paramMap.keys);//Retruns an array of all the keys of required or query parameters e.g Array["id"]
+```
+
+Note, required parameters and optional parameters appear after a **semicolon(;)** and queryparameters appear after a **question mark(?)**.
+e.g Given a route,
+
+```ts
+const appRoutes: Routes = [
+  { path: "list/:id", component: ListEmployeesComponent },
+];
+```
+
+And the link http://localhost:4200/list;id=1;name=mariam?level=10
+From the link above, id is my required parameter as it is explicity defined in the route configuration and is necessary while defining a route, while name is an optional parameter and level is a query parameter

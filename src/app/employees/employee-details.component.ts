@@ -33,7 +33,9 @@ private _id: number;
       this._id =  1;
     }
     
-    this._router.navigate(['/employee', this._id]);
+    this._router.navigate(['/employee', this._id], {
+       queryParamsHandling:"preserve"
+    });
   }
 
 }
