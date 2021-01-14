@@ -16,6 +16,16 @@ Run `ng build` to build the project. The build artifacts will be stored in the `
 
 ## Resources
 
+For your angular loading indicators, visit:
+[Loading indicator](https://loading.io/css)
+The little modifications to the css file of these loaders are
+
+1. change the background colour from white to the colour you wish
+2. change position from relative to fixed
+   If you need center it on the page, then add these below
+3. top: 50%
+4. Left: 50%
+
 To see a list of available resources we can use in our projects, visit
 [resources](https://angular.io/resources?category=development)
 
@@ -1487,3 +1497,178 @@ const appRoutes: Routes = [
 
 And the link http://localhost:4200/list;id=1;name=mariam?level=10
 From the link above, id is my required parameter as it is explicity defined in the route configuration and is necessary while defining a route, while name is an optional parameter and level is a query parameter
+
+**NOTE:** We can also use the queryParams method as shown below:
+
+```ts
+ employees: Employee[];
+ filteredEmployees: Employee[];
+
+this._route.queryParaMap.subscribe((queryParams) => {
+  if (queryParams.has('searchTerm')) {
+    this.searchTerm = queryParams.get('searchTerm');
+  } else {
+    this.filteredEmployees = this.employees;
+  }
+})
+```
+
+## OBSERVABLES
+
+The angular http service returns an observable.
+In your component.service.ts file, import
+
+```ts
+import { Observable } from "rxjs";
+import { of } from "rxjs";
+import { delay } from "rxjs/operators";
+```
+
+And we return our employee as an observable as shown below
+
+```ts
+getEmployees(): Observable<Employee[]> {
+  return of(this.listEmployees);
+}
+```
+
+From the above, the reurn type is an observable of employee array given as **Observable<Employee[]>**
+And the return inside the function has an **of** preceeding it i.e **return of(this.listEmployees)**
+
+And finally, in the component.ts file, we subscribe to this function as shown below:
+component.ts
+
+```ts
+this._employeeService
+  .getEmployees()
+  .subscribe((empList) => (this.employees = empList));
+```
+
+**NOTE** To use multiple operators together, we chain them using a pipe method e.g
+
+```ts
+getEmployees(): Observable<Employee[]> {
+    return of(this.listEmployees).pipe(
+      delay( 3000 );
+    );
+}
+```
+
+## Route Resolver
+
+To prefetch data and avoid showing empty component to users during asynchronous data fetch, we use route resolver either as a function or a service.
+**Route resolver** as a service
+STEPS:
+
+1. Create a service.ts file for the resolver that implements resolve e.g
+
+employee-list-resolver.service.ts
+
+```ts
+import { Injectable } from "@angular/core";
+import {
+  ActivatedRouteSnapshot,
+  Resolve,
+  RouterStateSnapshot,
+} from "@angular/router";
+import { Observable } from "rxjs";
+import { Employee } from "../models/employee.models";
+import { EmployeeService } from "./employee.service";
+
+@Injectable()
+export class EmployeeListResolverService implements Resolve<Employee[]> {
+  constructor(private _employeeService: EmployeeService) {}
+
+  resolve(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ): Observable<Employee[]> {
+    return this._employeeService.getEmployees();
+  }
+}
+```
+
+2. Register the route resolver service e.g
+
+app.module.ts
+
+```ts
+import { EmployeeListResolverService } from "./employees/employee-list-resolver.service";
+providers: [EmployeeListResolverService];
+```
+
+3. Add the route resolver service to the route for which we want to prefetch data e.g
+   You should pass it as an object of key and value pairs. In my examplee, i chose the key employeeList.
+
+```ts
+const appRoutes: Routes = [
+  {
+    path: "list",
+    component: ListEmployeesComponent,
+    resolve: { employeeList: EmployeeListResolverService },
+  },
+];
+```
+
+4. Read the prefetched data from the activated route e.g
+
+```ts
+constructor(private _route: ActivatedRoute) {
+  this.employees = this._route.snapshot.data['employeeList'];
+   if( this._route.snapshot.queryParamMap.get('searchTerm')) {
+      this.searchTerm = this._route.snapshot.queryParamMap.get('searchTerm');
+      } else {
+      this.filteredEmployees = this.employees;
+    }
+}
+```
+
+**NOTE**: I read the data stored in the prefetched object key 'employeeList'. The employeeList is the key i used to store prefetched data as shown from step 3 above under the resolve object. I stored this content into the attribute employees which is the attribute that displays our data on our html page.
+
+## Angular router navigation events
+
+To see the lists of events that are executed during routing we pass a second parameter **{enableTracing: true }** to the **RouterModule.forRoot()** method in our module e.g
+
+```ts
+RouterModule.forRoot(appRoutes, { enableTracing: true });
+```
+
+## How to Display a Loading indicator if there is a delay navigating from onr route to another
+
+Open your app.component.ts and add the following:
+
+1. Create a boolean property and initialize it to true
+2. import Router, Event and the necessary router navigation events as shown below
+3. Toggle the state of the boolean depending on the router navigation
+4. add your router code on the html page and conditionally show it depending on the boolean in the template file
+
+```ts
+import { Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError, Event } from '@angular/router';
+
+ showLoadingIndicator = true;
+  constructor(private _router: Router) {
+    this._router.events.subscribe((routerEvent: Event) => {
+      if(routerEvent instanceof NavigationStart) {
+        this.showLoadingIndicator = true;
+      }
+
+       if(routerEvent instanceof NavigationEnd ||
+        routerEvent instanceof  NavigationCancel ||
+        routerEvent instanceof  NavigationError ) {
+        this.showLoadingIndicator = false;
+      }
+    });
+  }
+```
+
+Then in your app.component.html, just before your <router-outlet></router-outlet> tag add the code. Note that you can add a spinner in this section instead of just a plain html
+
+```html
+<div class="lds-roller" *ngIf="showLoadingIndicator">
+  <div></div>
+  <div></div>
+  <div></div>
+</div>
+```
+
+## Implementing CanActivate Guard

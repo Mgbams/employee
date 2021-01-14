@@ -1,5 +1,11 @@
 import { Injectable } from "@angular/core";
+//import { Observable, of} from 'rxjs';
 import { Employee } from "../models/employee.models";
+import {Observable} from 'rxjs';
+import { of } from "rxjs";
+import { delay } from "rxjs/operators";
+
+
 
 @Injectable()
 export class EmployeeService {
@@ -41,8 +47,10 @@ export class EmployeeService {
       }
     ];
 
-    getEmployees(): Employee[] {
-        return this.listEmployees;
+    getEmployees(): Observable<Employee[]> {
+        return of(this.listEmployees).pipe(
+          delay( 2000 )
+        );
     }
 
      getEmployeeById(employeeId: number): Employee {
@@ -52,4 +60,9 @@ export class EmployeeService {
     save(employee: Employee) {
         this.listEmployees.push(employee);
     }
+
+    //Woking without observables
+   /*    getEmployees(): Employee[] {
+        return this.listEmployees;
+    } */
 }

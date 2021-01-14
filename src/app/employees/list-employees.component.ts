@@ -28,18 +28,31 @@ export class ListEmployeesComponent implements OnInit {
   // employeeToDisplay: Employee;
   // private arrayindex = 1;
   constructor(private _employeeService: EmployeeService, private _router: Router, private _route: ActivatedRoute) {
-  
-   }
+     this.employees = this._route.snapshot.data['employeeList']; // This displays prefetched data using route resolver
+     if( this._route.snapshot.queryParamMap.get('searchTerm')) {
+      this.searchTerm = this._route.snapshot.queryParamMap.get('searchTerm');
+      } else {
+      this.filteredEmployees = this.employees;
+      }  
+  }
 
   ngOnInit(): void {
-    this.employees = this._employeeService.getEmployees();
-    this.filteredEmployees = this.employees;
+    // this.employees = this._employeeService.getEmployees(); //without observable
+   /*  this._employeeService.getEmployees().subscribe((empList) => {
+      this.employees = empList;
+      if( this._route.snapshot.queryParamMap.get('searchTerm')) {
+      this.searchTerm = this._route.snapshot.queryParamMap.get('searchTerm');
+      } else {
+      this.filteredEmployees = this.employees;
+      }
+    }); */
     console.log(this._route.snapshot.queryParamMap.has('searchTerm'));
-    console.log(this._route.snapshot.queryParamMap.get('searchTerm'));
-    console.log(this._route.snapshot.queryParamMap.getAll('searchTerm'));
-    console.log(this._route.snapshot.queryParamMap.keys);
-    console.log(this._route.snapshot.paramMap.keys);
+    // console.log(this._route.snapshot.queryParamMap.get('searchTerm'));
+    // console.log(this._route.snapshot.queryParamMap.getAll('searchTerm'));
+    // console.log(this._route.snapshot.queryParamMap.keys);
+    // console.log(this._route.snapshot.paramMap.keys);
     // this.employeeToDisplay = this.employees[0];
+    
   };
 
   onClick(employeeId: number) {
