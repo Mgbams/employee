@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Employee } from '../models/employee.models';
 
 @Component({
@@ -11,10 +11,23 @@ export class DisplayEmployeeComponent implements OnInit{
   
   @Input() employee: Employee;
   selectedEmployeeId: number;
-  constructor(private _route: ActivatedRoute) { }
+  @Input() searchTerm: string;
+  constructor(private _route: ActivatedRoute, private _router: Router) { }
 
   getEmployeeNameAndGender(): string {
     return this.employee.name + ' ' + this.employee.gender;
+  }
+
+  viewEmployee() {
+    this._router.navigate(['/employee', this.employee.id], {
+      queryParams: {
+        'searchTerm': this.searchTerm
+      }
+    });
+  }
+
+  editEmployee() {
+    this._router.navigate(['/edit', this.employee.id]);
   }
 
   //This is used to pass data through output decorator

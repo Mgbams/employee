@@ -12,17 +12,11 @@
     Change Employee Name
   </button>
 </div>
-<div
-  *ngFor="let employee of filteredEmployees"
-  class="pointerCursor"
-  (mousemove)="onMouseMove()"
->
-  <div (click)="onClick(employee.id)">
-    <app-display-employee
-      [employee]="employee"
-      #childComponent
-    ></app-display-employee>
-  </div>
+<div *ngFor="let employee of filteredEmployees">
+  <app-display-employee
+    [employee]="employee"
+    [searchTerm]="searchTerm"
+  ></app-display-employee>
 </div>
 
 <!-- using template reference variable -->
@@ -55,4 +49,17 @@
     [employee]="employee"
     (notify)="handleNotify($event)"
   ></app-display-employee>
+</div> -->
+<!-- 
+<div
+  *ngFor="let employee of filteredEmployees"
+  class="pointerCursor"
+  (mousemove)="onMouseMove()"
+>
+  <div (click)="onClick(employee.id)">
+    <app-display-employee
+      [employee]="employee"
+      #childComponent
+    ></app-display-employee>
+  </div>
 </div> -->

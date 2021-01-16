@@ -18,6 +18,8 @@ import { EmployeeDetailsComponent } from './employees/employee-details.component
 import { CreateEmployeeComponent } from './employees/create-employee.component';
 import { EmployeeFilterPipe } from './employees/employee-filter.pipe';
 import { EmployeeListResolverService } from './employees/employee-list-resolver.service';
+import { PageNotFoundComponent } from './page-not-found.component';
+import { EmployeeDetailsGuardService } from './employees/employee-details-guard.service';
 
 const appRoutes: Routes = [
   {
@@ -25,9 +27,14 @@ const appRoutes: Routes = [
     component: ListEmployeesComponent,
     resolve: {employeeList: EmployeeListResolverService}
   },
-  {'path': 'employee/:id', component: EmployeeDetailsComponent},
   {
-    'path': 'create', 
+    'path': 'employee/:id', 
+    component: EmployeeDetailsComponent,
+    canActivate: [EmployeeDetailsGuardService]
+  },
+  {'path': 'notfound', component: PageNotFoundComponent},
+  {
+    'path': 'edit/:id', 
     component: CreateEmployeeComponent,
     canDeactivate: [CreateEmployeeCanDeactivateGuardService]
   },
@@ -44,7 +51,8 @@ const appRoutes: Routes = [
     DisplayEmployeeComponent,
     EmployeeDetailsComponent,
     EmployeeDetailsComponent,
-    EmployeeFilterPipe
+    EmployeeFilterPipe,
+    PageNotFoundComponent
   ],
   imports: [
     BrowserModule,
@@ -55,7 +63,7 @@ const appRoutes: Routes = [
     RouterModule.forRoot(appRoutes),
     AppRoutingModule
   ],
-  providers: [EmployeeService, CreateEmployeeCanDeactivateGuardService, EmployeeListResolverService],
+  providers: [EmployeeService, CreateEmployeeCanDeactivateGuardService, EmployeeListResolverService, EmployeeDetailsGuardService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

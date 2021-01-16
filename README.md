@@ -1672,3 +1672,90 @@ Then in your app.component.html, just before your <router-outlet></router-outlet
 ```
 
 ## Implementing CanActivate Guard
+
+An example is shown below:
+The explanaton is as follows
+
+1. The parameter passed to the route is gotten by the route method inside the canActivae method i.e
+   **this.\_employeeService.getEmployeeById(+route.paramMap.get('id'))**.
+2. Also you need to add a + sign to the parameter gotten from the url in this case as the returned parameter is always in string format and we need convert it to a number with the help of the plus symbol(+).
+3. This line **this.\_employeeService.getEmployeeById(+route.paramMap.get('id'))** returns an object of the employee with the passed in id. So to convert it to boolean i.e true if it exists and false if it doesn't exists, we use two exclamation marks **!!**.
+
+```ts
+import { Injectable } from "@angular/core";
+import {
+  ActivatedRouteSnapshot,
+  CanActivate,
+  Router,
+  RouterStateSnapshot,
+} from "@angular/router";
+import { EmployeeService } from "./employee.service";
+
+@Injectable()
+export class EmployeeDetailsGuardService implements CanActivate {
+  constructor(
+    private _employeeService: EmployeeService,
+    private _router: Router
+  ) {}
+  canActivate(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ): boolean {
+    const employeeExists = !!this._employeeService.getEmployeeById(
+      +route.paramMap.get("id")
+    );
+
+    if (employeeExists) {
+      return true;
+    } else {
+      this._router.navigate(["notfound"]);
+      return false;
+    }
+  }
+}
+```
+
+## Passing data between components
+
+1. Passing data from parent component to child component, we use **Input properties**
+2. Passing data from child component to parent component, we use either
+
+- Output Properties
+- Template Reference Variables
+
+3. Passing data from component to component (No parent child relation), we use
+
+- Angular Service
+
+* Required Route Parameters
+* Optional Route Parameters
+* Query Parameters
+
+## Editing and updating data
+
+To use the same form for creating and updating form fields, we create the route as shown here E.g
+component.ts
+
+```ts
+ {
+    'path': 'edit/:id', //note the id passed here. it will be set to 0 for default route. i.e create page
+    component: CreateEmployeeComponent,
+    canDeactivate: [CreateEmployeeCanDeactivateGuardService]
+  },
+```
+
+Then in component.html, we set the id to 0 which will display the form by default when the link is clicked e.g
+
+```html
+<li>
+  <a routerLink="edit/0">Create</a>
+</li>
+```
+
+Then on clicking on edit button, we can pass the id of the item to the edit route and it now means we will be modifying an item with the given id. Since an item does not have an id as 0, we chose 0 as the default page for creating a new item. Here is the method that routes us to the edit page with a particular id
+
+```ts
+ editEmployee() {
+    this._router.navigate(['/edit', this.employee.id]);
+  }
+```

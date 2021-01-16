@@ -55,14 +55,14 @@ export class ListEmployeesComponent implements OnInit {
     
   };
 
-  onClick(employeeId: number) {
+ /*  onClick(employeeId: number) {
     this._router.navigate(['/employee', employeeId], {
       queryParams: {
         'searchTerm': this.searchTerm,
         'testParam': 'testValue'
       }
     });
-  }
+  } */
 
   changeEmployeeName() {
     this.employees[1].name = 'Jordan';
@@ -72,10 +72,10 @@ export class ListEmployeesComponent implements OnInit {
     // this.employees = newEmployeeArray;
   }
 
-  onMouseMove() {
+ /*  onMouseMove() {
 
   }
-  
+   */
   //used it to get data when using output decorator from the child component
  /*  handleNotify(eventData: Employee) {
     this.dataFromChild = eventData;
