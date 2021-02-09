@@ -1759,3 +1759,337 @@ Then on clicking on edit button, we can pass the id of the item to the edit rout
     this._router.navigate(['/edit', this.employee.id]);
   }
 ```
+
+## Making a production build
+
+```bash
+ ng build --prod
+```
+
+You can install lite server with:
+
+```ts
+npm i -g lite-server
+```
+
+Running your production app with lite-server
+Change directory to dist and then the name of your project e.g cd dist/projectName
+Then press Enter. Type **lite-server** and press Enter, it will launch your app.
+
+## Changing classes dynamically
+
+The simplest form is <div [class.active]="counter ? 4 'active' : 'nonActive'"></div>
+Advanced code form in template is
+
+<div [ngClass]="changeClass()"></div>
+Example of controlling it in typescipt file
+
+```
+counter: number = 0;
+
+changeClass() {
+  let myClass = {
+    active: this.counter > 4,
+    nonActive: this.counter <= 4
+  }
+}
+```
+
+Then in your scss file, you define the styles for active and nonActive.
+
+We can also use this method of template reference variable below:
+
+<div [class.active]="counter ? 4">
+  <ng-template [ngIf]="counter ? 4" [ngIfElse]="none">
+    counter greater than four
+  </ng-template>
+
+<ng-template #none>
+counter less than four
+</ng-template>
+
+</div>
+
+## Changing styles dynamically
+
+The simplest form is
+
+<div [style.background-color]="counter ? 4 'yellow' : 'light-gray'"></div>
+Advanced in template is
+<div [ngStyle]="{
+  'background-color': counter ? 4 'yellow' : 'light-gray',
+  'border': counter ? 4 '1px solid red' : '1px solid gray'
+  }"></div>
+
+## findindex method
+
+```ts
+const foundIndex = this.listEmployees.findIndex((e) => e.id === employee.id);
+this.listEmployees[foundIndex] = employee;
+```
+
+## using reduce method to get the max id in an array
+
+```ts
+ save(employee: Employee) {
+      if(employee.id === null) {
+        //using reduce to get max id
+      const maxid =  this.listEmployees.reduce(function(e1, e2) {
+            return (e1.id > e2.id) ? e1 : e2;
+    }).id;
+  }
+```
+
+## using splice method to delete an item from an array
+
+e.g
+
+```ts
+   delete(id: number) {
+      const i = this.listEmployees.findIndex(e => e.id == id);
+      if(i !== -1) {
+        this.listEmployees.splice(i, 1); // splice
+      }
+    }
+  // in splice the first parameter is the index of the element we ant to remove and the
+  // second parameter is the number of items to remove starting from the index of the first parameter
+```
+
+## Creating accordion that is not reusable
+
+In the component.ts file, create a boolean as shown below
+
+```ts
+isHidden = false;
+```
+
+Then in your component.html file, add the above property to the divs that are to be toggled and control the toggle with a click event as shown below
+
+```html
+<!--The click event is attached to the div with pointerCursor-->
+<div class="panel panel-primary">
+  <div class="pointerCursor" (click)="isHidden = !isHidden">
+    <h3 class="panel-title">{{ employee.name | uppercase }}</h3>
+  </div>
+
+  <div class="panel-body" *ngIf="isHidden">
+    <p>I am body</p>
+  </div>
+
+  <div class="panel-footer" *ngIf="isHidden">
+    <p>I am footer</p>
+  </div>
+</div>
+
+<!--OR using hidden property -->
+<div class="panel panel-primary">
+  <div class="pointerCursor" (click)="isHidden = !isHidden">
+    <h3 class="panel-title">{{ employee.name | uppercase }}</h3>
+  </div>
+
+  <div class="panel-body" [hidden]="isHidden">
+    <p>I am body</p>
+  </div>
+
+  <div class="panel-footer" [hidden]="isHidden">
+    <p>I am footer</p>
+  </div>
+</div>
+```
+
+**NOTE**: ngIf removes a content completely from the DOM when the condition is false and re-adds the content to the DOM when the condition is true; So it is preferable to use the hidden property of angular to show and hide a content instead of using ngIf, that is if we are likely to show or hide that content several times in our code.
+
+## using Angular Content projection to create a reusable accordion
+
+<ng-content></ng-content> can be seen as a placeholder for a component's variable.
+We can use it to inject content into a component as is done in a reusable accordion.
+So if you have two places you need to insert data then you need two <ng-content><ng-content> tags.
+Like adding content in a card-body and a card-footer.
+**STEPS**
+To create a reusable component, we can create the component in a shared folder since it will be shared among other components, so we generate it as follows:
+
+- generate the component
+
+```bash
+$ ng g c shared/accordion --flat
+// Here accordion is the name of the component to be generated
+```
+
+When we have more than one ng-content, we talk of multi-slot component projection.
+When it is a single ng-content, we have a single-slot content projection.
+
+- Add variables that are to be passed to this accordion in the accordion.ts file
+  e.g
+
+```ts
+import { Component, Input, OnInit } from '@angular/core';
+ @Input() hasJustViewed: boolean;
+  @Input() title: string;
+  isHidden: false;
+```
+
+- create the accordion html template
+  e.g
+
+```html
+<div class="panel panel-primary" [class.panel-success]="hasJustViewed">
+  <div class="panel-heading pointerCursor" (click)="isHidden = !isHidden">
+    <h3 class="panel-title">{{ title | uppercase }}</h3>
+  </div>
+
+  <div class="panel-body" [hidden]="isHidden">
+    <ng-content select=".myPanelBody"></ng-content>
+  </div>
+
+  <div class="panel-footer" [hidden]="isHidden">
+    <ng-content select=".myPanelFooter"></ng-content>
+  </div>
+</div>
+```
+
+Notice the **select=".myPanelFooter"** and the **select=".myPanelBody"** on the ng-content tags. these are classes that will be used on the divs in the calling component to indicate which div represents the footer and which div represents the body.
+
+- Finally call the accordion component in the component.html file that will use it by using its template reference template
+  E.g In display-employee.component.html
+
+```html
+<app-accordion
+  [title]="employee.name"
+  [hasJustViewed]="selectedEmployeeId === employee.id"
+>
+  <div class="col-xs-10 myPanelBody">
+    <div class="row vertical-align">
+      <div class="col-xs-4">
+        <img [src]="employee.photoPath" alt="" class="imageClass" />
+      </div>
+      <div class="col-xs-8">
+        <div class="row">
+          <div class="col-xs-6">Gender</div>
+          <div class="col-xs-6">: {{ employee.gender }}</div>
+
+          <div class="col-xs-6">Email</div>
+          <div class="col-xs-6">: {{ employee.email }}</div>
+
+          <div class="col-xs-6">Phone Number</div>
+          <div class="col-xs-6">: {{ employee.phoneNumber }}</div>
+
+          <div class="col-xs-6">Date Of Birth</div>
+          <div class="col-xs-6">: {{ employee.dateOfBirth | date }}</div>
+
+          <div class="col-xs-6">Department</div>
+          <div class="col-xs-6" [ngSwitch]="employee.department">
+            :
+            <span *ngSwitchCase="1">Help Desk</span>
+            <span *ngSwitchCase="2">HR</span>
+            <span *ngSwitchCase="3">IT</span>
+            <span *ngSwitchCase="4">PayRoll</span>
+            <span *ngSwitchDefault>N/A</span>
+          </div>
+
+          <div class="col-xs-6">Is Active</div>
+          <div class="col-xs-6">: {{ employee.isActive }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="myPanelFooter">
+    <button class="btn btn-primary" (click)="viewEmployee()">View</button>
+    <button class="btn btn-primary" (click)="editEmployee()">Edit</button>
+    <span *ngIf="confirmDelete">
+      <span>Are you sure you want to delete?</span>
+      <button class="btn btn-danger" (click)="deleteEmployee()">Yes</button>
+      <button class="btn btn-primary" (click)="confirmDelete = false">
+        No
+      </button>
+    </span>
+    <button
+      *ngIf="!confirmDelete"
+      class="btn btn-danger"
+      (click)="confirmDelete = true"
+    >
+      Delete
+    </button>
+  </div>
+</app-accordion>
+```
+
+Here, <app-accordion></app-accordion> is added to the component and the two sibling divs are filled with contents inbetween the app-accordion tags. Each div is given a class that corresponds to the name in the select property in the accordion.component.html. And binding is done to match the attributes specified in the accordion.component.ts file.
+
+## Creating fake REST API
+
+REST -> representational state transfer: It is an architectural pattern for creating an api that uses http as its communication method. It uses constraints such as
+
+- Clent server constraints
+- Stateless constraints
+- cacheable constraints
+- Uniform interface constraints: defines the interface between the client and the server
+
+Resources examples
+
+```ts
+Resource        Verb      Outcome
+
+/Employees      GET       Gets a list of employees
+/Employees/1    GET       gets employee with id = 1
+/Employees      POST      Creates a new employee
+/Employees/1    PUT       Updates emploee with id = 1
+/Employees/1    DELETE    Deletes employee with id = 1
+```
+
+https://github.com/typicode/json-server
+To install the json server indicated by the link above, type
+
+```bash
+$ npm install -g json-server
+```
+
+To start the server, use
+
+```bash
+$ json-server --watch db.json
+```
+
+NOTE, To add data to this json server, all the json added data, i.e keys and value pairs must be in double quotes except boolean values and phone number values e.g
+"id": "1"
+
+## Testing fake rest API
+
+Use Fiddler
+
+## Using HttpClient for request
+
+- Import HttpClientModule into app.module.ts and add it in the import array as shown below
+
+```ts
+import {HttpClientModule} from '@angular/common/http';
+
+imports: [
+    HttpClientModule
+  ],
+```
+
+- Import HttpClient in the service file where the request is made E.g
+  employee.service.ts
+  Also inject the imported HttpClient in the constructor of the service file.
+
+```ts
+import { HttpClient } from "@angular/common/http";
+
+constructor(private httpClient: HttpClient) {
+
+}
+```
+
+- Use the injected httpClient to make your requests e.g
+  A get request is shown below:
+
+```ts
+getEmployees(): Observable<Employee[]> {
+  return this.httpClient.get<Employee[]>("http://localhost:3000/employees");
+}
+```
+
+Note that a httpClient request returns an object, so to have an array, you typecast it as shown in
+**this.httpClient.get<Employee[]>**. Here it is typecasted as an employee array.
+Note that you need to subscribe to a data gotten by httpClient if you want to use it. the only time you don't explicitly subscribe to use it is when you use a resolver service.

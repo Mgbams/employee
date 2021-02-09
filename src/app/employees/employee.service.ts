@@ -4,11 +4,11 @@ import { Employee } from "../models/employee.models";
 import {Observable} from 'rxjs';
 import { of } from "rxjs";
 import { delay } from "rxjs/operators";
-
-
+import {HttpClient} from '@angular/common/http';
 
 @Injectable()
 export class EmployeeService {
+  constructor(private httpClient: HttpClient) {}
     private listEmployees: Employee[] = [
      {
         id: 1,
@@ -48,9 +48,10 @@ export class EmployeeService {
     ];
 
     getEmployees(): Observable<Employee[]> {
-        return of(this.listEmployees).pipe(
-          delay( 2000 )
-        );
+        // return of(this.listEmployees).pipe(
+        //   delay( 2000 )
+        // );
+        return this.httpClient.get<Employee[]>('http://localhost:3000/employees');
     }
 
      getEmployeeById(employeeId: number): Employee {
@@ -58,7 +59,24 @@ export class EmployeeService {
     }
 
     save(employee: Employee) {
+      if(employee.id === null) {
         this.listEmployees.push(employee);
+        const maxid = this.listEmployees.reduce(function(e1, e2) {
+            return (e1.id > e2.id) ? e1 : e2;
+          }).id;
+          employee.id = maxid + 1;
+      } else {
+        const foundIndex = this.listEmployees.findIndex(e => e.id === employee.id);
+        this.listEmployees[foundIndex] = employee;
+      }
+     
+    }
+
+    delete(id: number) {
+      const i = this.listEmployees.findIndex(e => e.id == id);
+      if(i !== -1) {
+        this.listEmployees.splice(i, 1);
+      }
     }
 
     //Woking without observables

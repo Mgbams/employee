@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Employee } from '../models/employee.models';
+import { EmployeeService } from './employee.service';
 
 @Component({
   selector: 'app-display-employee',
@@ -12,7 +13,10 @@ export class DisplayEmployeeComponent implements OnInit{
   @Input() employee: Employee;
   selectedEmployeeId: number;
   @Input() searchTerm: string;
-  constructor(private _route: ActivatedRoute, private _router: Router) { }
+  @Output() notifyDelete: EventEmitter<number> = new EventEmitter<number>();
+  confirmDelete = false;
+  
+  constructor(private _route: ActivatedRoute, private _router: Router, private _employeeService: EmployeeService) { }
 
   getEmployeeNameAndGender(): string {
     return this.employee.name + ' ' + this.employee.gender;
@@ -28,6 +32,12 @@ export class DisplayEmployeeComponent implements OnInit{
 
   editEmployee() {
     this._router.navigate(['/edit', this.employee.id]);
+  }
+
+  deleteEmployee() {
+    //console.log(this.employee);
+    this._employeeService.delete(this.employee.id);
+    this.notifyDelete.emit(this.employee.id);
   }
 
   //This is used to pass data through output decorator

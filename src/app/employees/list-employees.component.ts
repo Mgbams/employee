@@ -72,6 +72,13 @@ export class ListEmployeesComponent implements OnInit {
     // this.employees = newEmployeeArray;
   }
 
+  onDeleteNotification(id: number) {
+    const i = this.filteredEmployees.findIndex(e => e.id == id);
+      if(i !== -1) {
+        this.filteredEmployees.splice(i, 1);
+      }
+  }
+
  /*  onMouseMove() {
 
   }

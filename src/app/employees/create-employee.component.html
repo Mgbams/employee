@@ -1,7 +1,7 @@
 <form ngNativeValidate #employeeForm="ngForm" (ngSubmit)="saveEmployee()">
   <div class="panel panel-primary">
     <div class="panel-heading">
-      <h3 class="panel-title">Create Employee</h3>
+      <h3 class="panel-title">{{ panelTitle }}</h3>
     </div>
 
     <div class="panel-body">
@@ -36,7 +36,7 @@
           type="text"
           id="email"
           name="email"
-          [required]="contactPreference.value === 'email'"
+          [required]="contactPreference.value === 'Email'"
           email
           ngModel
           [(ngModel)]="employee.email"
@@ -57,7 +57,7 @@
           type="text"
           id="phoneNumber"
           name="phoneNumber"
-          [required]="contactPreference.value === 'phone'"
+          [required]="contactPreference.value === 'Phone'"
           #phoneNumber="ngModel"
           ngModel
           [(ngModel)]="employee.phoneNumber"
@@ -81,7 +81,7 @@
           <label for="byEmail" class="radio-inline">
             <input
               type="radio"
-              value="email"
+              value="Email"
               id="byEmail"
               required
               #contactPreference="ngModel"
@@ -95,7 +95,7 @@
           <label for="phone" class="radio-inline">
             <input
               type="radio"
-              value="phone"
+              value="Phone"
               id="phone"
               required
               #contactPreference="ngModel"
@@ -124,7 +124,7 @@
           <label for="male" class="radio-inline">
             <input
               type="radio"
-              value="male"
+              value="Male"
               id="male"
               name="gender"
               required
@@ -138,7 +138,7 @@
           <label for="female" class="radio-inline">
             <input
               type="radio"
-              value="female"
+              value="Female"
               id="female"
               name="gender"
               required
@@ -248,12 +248,20 @@
       </div>
 
       <div class="form-group">
-        <button type="button" class="btn btn-primary" (click)="togglePreview()">
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="togglePreview()"
+          *ngIf="employee.photoPath !== '' && employee.photoPath !== null"
+        >
           {{ previewPhoto ? "Hide" : "Show" }} Preview
         </button>
       </div>
 
-      <div class="form-group">
+      <div
+        class="form-group"
+        *ngIf="employee.photoPath !== '' && employee.photoPath !== null"
+      >
         <img
           [src]="employee.photoPath"
           height="200"

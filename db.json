@@ -1,0 +1,39 @@
+{
+  "employees": [
+    {
+        "id": "1",
+        "name": "Nick",
+        "gender": "Male",
+        "email": "john@gmail.com",
+        "contactPreference": "Email",
+        "dateOfBirth": "1988/10/12",
+        "department": "3",
+        "isActive": true,
+        "photoPath": "assets/images/john.jpg"
+      },
+      {
+        "id": "2",
+        "name": "Mark",
+        "gender": "Male",
+        "email": "mark@gmail.com",
+        "phoneNumber": 7888888894,
+        "contactPreference": "phone",
+        "dateOfBirth": "1992/12/06",
+        "department": "1",
+        "isActive": true,
+        "photoPath": "assets/images/mark.jpg"
+      },
+      {
+        "id": "3",
+        "name": "Mary",
+        "gender": "Female",
+        "email": "mary@gmail.com",
+        "contactPreference": "Email",
+        "dateOfBirth": "2000/10/01",
+        "department": "2",
+        "isActive": true,
+        "photoPath": "assets/images/mary.jpg"
+
+      }
+  ]
+}
