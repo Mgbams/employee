@@ -31,11 +31,19 @@ export class ListEmployeesComponent implements OnInit {
   // employeeToDisplay: Employee;
   // private arrayindex = 1;
   constructor(private _employeeService: EmployeeService, private _router: Router, private _route: ActivatedRoute) {
-     const resolvedEmployeeList: ResolvedEmployeeList = this.employees = this._route.snapshot.data['employeeList']; // This displays prefetched data using route resolver
-     if(resolvedEmployeeList.error === null) {
+    //This is used when resolved-emploee-list.model.ts is used in employee-list-resolver.service.ts
+     //const resolvedEmployeeList: ResolvedEmployeeList = this.employees = this._route.snapshot.data['employeeList']; // This displays prefetched data using route resolver
+    /*  if(resolvedEmployeeList.error === null) {
        this.employees = resolvedEmployeeList.employeeList;
      } else {
        this.error = resolvedEmployeeList.error;
+     } */
+
+    const resolvedData: Employee[] | string = this.employees = this._route.snapshot.data['employeeList']; 
+    if(Array.isArray(resolvedData)) {
+       this.employees = resolvedData;
+     } else {
+       this.error = resolvedData;
      }
      if( this._route.snapshot.queryParamMap.get('searchTerm')) {
       this.searchTerm = this._route.snapshot.queryParamMap.get('searchTerm');

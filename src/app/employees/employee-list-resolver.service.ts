@@ -7,7 +7,7 @@ import { ResolvedEmployeeList } from "./resolved-employee-list.model";
 import { catchError, map } from 'rxjs/operators';
 
 @Injectable()
-export class EmployeeListResolverService implements Resolve<ResolvedEmployeeList> {
+/* export class EmployeeListResolverService implements Resolve<ResolvedEmployeeList> {
     constructor(private _employeeService: EmployeeService) {
 
     }
@@ -18,6 +18,22 @@ export class EmployeeListResolverService implements Resolve<ResolvedEmployeeList
              map((employeeList) => new ResolvedEmployeeList(employeeList)),
              catchError((err: any) => {
                   return of(new ResolvedEmployeeList(null, err));
+             })
+        );
+     };
+}
+ */
+
+ // If you don't want to create a model like we did above, you can also use this method below
+export class EmployeeListResolverService implements Resolve<Employee[] | string> {
+    constructor(private _employeeService: EmployeeService) {
+
+    }
+     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Employee[] | string> {
+         return this._employeeService.getEmployees()
+         .pipe(
+             catchError((err: string) => {
+                  return of(err);
              })
         );
      };

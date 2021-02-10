@@ -20,8 +20,12 @@ private _id: number;
       console.log(params);
       this._id = +params.get('id');
        console.log(this._id );
-       this.employee = this._employeeService.getEmployeeById(this._id);
-        console.log(this.employee);
+       //this.employee = this._employeeService.getEmployeeById(this._id); // used for array in client side
+        //console.log(this.employee);
+        this._employeeService.getEmployeeById(this._id).subscribe(
+        (employee) => this.employee = employee,
+        (error: any) => console.log(error)
+      )
     }); 
    
   }

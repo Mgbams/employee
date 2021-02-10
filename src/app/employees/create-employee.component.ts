@@ -80,21 +80,45 @@ export class CreateEmployeeComponent implements OnInit {
         confirmPassword: null
       };
       this.panelTitle = "Create employee";
-      this.createEmployeeForm.reset();
+      //this.createEmployeeForm.reset();
     } else {
       this.panelTitle = "Edit employee";
-      this.employee = Object.assign({}, this._employeeService.getEmployeeById(id));
+      //this.employee = Object.assign({}, this._employeeService.getEmployeeById(id)); // used for array on client side
+      this._employeeService.getEmployeeById(id).subscribe(
+        (employee) => this.employee = employee,
+        (error: any) => console.log(error)
+      )
     }
   }
 
   saveEmployee(): void {
-    //console.log();
-    const newEmployee: Employee = Object.assign({}, this.employee); 
-    console.log( newEmployee);
-    this._employeeService.save(newEmployee);
+    // Check if you are updating or making a post request depending on the incoming id
+    if (this.employee.id === null) {
+      this._employeeService.addEmployee(this.employee).subscribe(
+        (data: Employee) => {
+          console.log(data);
+          this.createEmployeeForm.reset();
+          this._router.navigate(['list']);
+        },
+        (error: any) => console.log(error)
+      );
+    } else {
+      this._employeeService.updateEmployee(this.employee).subscribe(
+        () => {
+          this.createEmployeeForm.reset();
+          this._router.navigate(['list']);
+        },
+        (error: any) => console.log(error)
+      );
+    }
+    //Used for saving data to an array on the client side
+    // const newEmployee: Employee = Object.assign({}, this.employee); 
+    // console.log( newEmployee);
+    // this._employeeService.save(newEmployee); // Used for storing in an array on the client side
     //empForm.reset(); //Reset your form before the navigation command
-    this.createEmployeeForm.reset();
-    this._router.navigate(['list']);
+    // Used while saving data in an array on the client side
+    // this.createEmployeeForm.reset();
+    // this._router.navigate(['list']);
   }
 
   togglePreview() {

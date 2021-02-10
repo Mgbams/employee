@@ -2050,8 +2050,9 @@ To start the server, use
 $ json-server --watch db.json
 ```
 
-NOTE, To add data to this json server, all the json added data, i.e keys and value pairs must be in double quotes except boolean values and phone number values e.g
-"id": "1"
+NOTE, To add data to this json server, all the json added data, i.e keys and value pairs must be in double quotes except boolean values, id, amount, price and phone number values e.g
+"id": 1,
+"name": "uju"
 
 ## Testing fake rest API
 
@@ -2217,4 +2218,68 @@ constructor(private _employeeService: EmployeeService, private _router: Router, 
 
 ```html
 <div *ngIf="error">{{ error }}</div>
+```
+
+## Post request in angular
+
+To make a post request, we need three information
+
+- The Url to be posted to as the first parameter
+- he data to be posted as the second parameter
+- The headers that contains the content-type
+  Example of a post request is given below:
+
+```ts
+this.httpClient
+  .post<Employee>("http://localhost:3000/employees", employee, {
+    headers: new HttpHeaders({
+      "Content-Type": "application/json",
+    }),
+  })
+  .pipe(catchError(this.handleError));
+```
+
+## Making a PUT request
+
+In this case, we don't return anything so we have the return type as observable<void>
+e.g
+
+```ts
+  baseUrl = 'http://localhost:3000/employees';
+  updateEmployee(employee: Employee): Observable<void> {
+        return this.httpClient.put<void>(`${this.baseUrl}/${employee.id}`, employee, {
+          headers: new HttpHeaders({
+            'Content-Type': 'application/json'
+          })
+        }).pipe(catchError(this.handleError))
+    }
+
+```
+
+Also note the right usage of **return of(employee)** or **return of(false)**
+Below is the save logic that chooses between updating or adding data to our database
+
+```ts
+saveEmployee(): void {
+    // Check if you are updating or making a post request depending on the incoming id
+    if (this.employee.id === null) {
+      // Create new data
+      this._employeeService.addEmployee(this.employee).subscribe(
+        (data: Employee) => {
+          console.log(data);
+          this.createEmployeeForm.reset();
+          this._router.navigate(['list']);
+        },
+        (error: any) => console.log(error)
+      );
+    } else {
+       // Update data
+      this._employeeService.updateEmployee(this.employee).subscribe(
+        () => {
+          this.createEmployeeForm.reset();
+          this._router.navigate(['list']);
+        },
+        (error: any) => console.log(error)
+      );
+    }
 ```
