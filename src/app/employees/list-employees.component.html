@@ -20,6 +20,10 @@
   ></app-display-employee>
 </div>
 
+<div *ngIf="error">
+  {{ error }}
+</div>
+
 <!-- using template reference variable -->
 <!-- <h1 #h1Variable></h1>
 <div *ngFor="let employee of employees">

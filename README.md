@@ -2092,4 +2092,129 @@ getEmployees(): Observable<Employee[]> {
 
 Note that a httpClient request returns an object, so to have an array, you typecast it as shown in
 **this.httpClient.get<Employee[]>**. Here it is typecasted as an employee array.
-Note that you need to subscribe to a data gotten by httpClient if you want to use it. the only time you don't explicitly subscribe to use it is when you use a resolver service.
+Note that you need to subscribe to a data gotten by httpClient if you want to use it. the only time you don't explicitly subscribe to use it is when you call the method consuming the httpClient inside a reolver service.
+
+## handling Http Errors
+
+Error during request should be handled in a service and not in a component.
+**VERY IMPORTANT**: While handling error in angular, we have either a server side error response or a client ErrorEvent error.
+
+- ErrorEvent: This is either a network error or a client side error.
+  Write your logic as shown below in your service.ts file.
+
+  - Import catchError and throwError as shown below.
+  - write the method that handles the error as shown in handleError() method below.
+  - Chain your error code to the method fetching or posting your data using pipe and catchError as show in
+    getEmployees() method below.
+
+```ts
+  import {throwError} from 'rxjs';
+  import { catchError } from 'rxjs/operators';
+
+  getEmployees(): Observable<Employee[]> {
+        return this.httpClient.get<Employee[]>('http://localhost:3000/employees')
+                              .pipe(catchError(this.handleError));
+  }
+
+  private handleError(errorResponse: HttpErrorResponse) {
+      if(errorResponse.error instanceof ErrorEvent) {
+        //Meaning it is a client side error or a network error
+        console.error('Client side error', errorResponse.error.message);
+      } else {
+        //Meaning it is a server side error
+        console.error('Server side error', errorResponse);
+      }
+
+      return throwError("There is a problem with the service. We are notified and working on it. Please try again later!")
+  }
+```
+
+For more info, visit:
+[stackoverflow](https://stackoverflow.com/questions/58297464/how-to-solve-catch-error-in-observable-in-angular-8)
+Also checkout pipeable operators in angular if you want to know the type of operators that can be joined be pipe method to a method. catchError, map are examples of pipeable operators.
+Piping multiple methods can be achieved as follows:
+
+```ts
+return this.httpClient
+  .get<Employee[]>("http://localhost:3000/employees")
+  .pipe(catchError(this.handleError), map());
+```
+
+from the above, i piped catcherror and map methods.
+**Note** the below order for provision of services when resolver is used
+Component <-> route <-> resolver service <-> angular service <-> server side service.
+
+**Note** the below order for provision of services with No resolver
+Component <-> angular service <-> server side service
+
+## handling resolver error messages when resolver is used in our app
+
+STEPS
+
+- Create a model e.g resolved.model.ts file
+
+```ts
+import { Employee } from "../models/employee.models";
+
+export class ResolvedEmployeeList {
+  constructor(public employeeList: Employee[], public error: any = null) {}
+}
+```
+
+- Rewrite your resolved.service.ts file to use the resolved model created above
+
+```ts
+import { Injectable } from "@angular/core";
+import {
+  ActivatedRouteSnapshot,
+  Resolve,
+  RouterStateSnapshot,
+} from "@angular/router";
+import { Observable, of } from "rxjs";
+import { Employee } from "../models/employee.models";
+import { EmployeeService } from "./employee.service";
+import { ResolvedEmployeeList } from "./resolved-employee-list.model";
+import { catchError, map } from "rxjs/operators";
+
+@Injectable()
+export class EmployeeListResolverService
+  implements Resolve<ResolvedEmployeeList> {
+  constructor(private _employeeService: EmployeeService) {}
+
+  resolve(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ): Observable<ResolvedEmployeeList> {
+    return this._employeeService.getEmployees().pipe(
+      map((employeeList) => new ResolvedEmployeeList(employeeList)),
+      catchError((err: any) => {
+        return of(new ResolvedEmployeeList(null, err));
+      })
+    );
+  }
+}
+```
+
+- Write the logic of consumption in the component that uses this resolver. e.g
+  in list-employee.component.ts file
+
+```ts
+employees: Employee[];
+error: string;
+
+constructor(private _employeeService: EmployeeService, private _router: Router, private _route: ActivatedRoute) {
+  const resolvedEmployeeList: ResolvedEmployeeList = this.employees = this._route.snapshot.data['employeeList']; // This displays prefetched data using route resolver
+     if(resolvedEmployeeList.error === null) {
+       this.employees = resolvedEmployeeList.employeeList;
+     } else {
+       this.error = resolvedEmployeeList.error;
+     }
+}
+```
+
+- bind to the error attribute in your component.html file e.g
+  list-employee.component.html
+
+```html
+<div *ngIf="error">{{ error }}</div>
+```

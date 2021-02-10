@@ -1,10 +1,12 @@
 import { Injectable } from "@angular/core";
 //import { Observable, of} from 'rxjs';
 import { Employee } from "../models/employee.models";
-import {Observable} from 'rxjs';
+import {Observable, throwError} from 'rxjs';
 import { of } from "rxjs";
 import { delay } from "rxjs/operators";
-import {HttpClient} from '@angular/common/http';
+import { catchError } from 'rxjs/operators';
+
+import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 
 @Injectable()
 export class EmployeeService {
@@ -51,11 +53,26 @@ export class EmployeeService {
         // return of(this.listEmployees).pipe(
         //   delay( 2000 )
         // );
-        return this.httpClient.get<Employee[]>('http://localhost:3000/employees');
+        // To use the link at localhost:3000, make sure the fake api at that location is active by running
+        // the below command in your terminal:  json-server --watch db.json
+        return this.httpClient.get<Employee[]>('http://localhost:3000/employees1')
+                                 .pipe(catchError(this.handleError));
     }
 
      getEmployeeById(employeeId: number): Employee {
         return this.listEmployees.find(e => e.id === employeeId);
+    }
+
+    private handleError(errorResponse: HttpErrorResponse) {
+      if(errorResponse.error instanceof ErrorEvent) {
+        //Meaning it is a client side error or a network error
+        console.error('Client side error', errorResponse.error.message);
+      } else {
+        //Meaning it is a server side error 
+        console.error('Server side error', errorResponse);
+      }
+      
+      return throwError("There is a problem with the service. We are notified and working on it. Please try again later!")
     }
 
     save(employee: Employee) {
