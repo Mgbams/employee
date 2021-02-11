@@ -37,6 +37,12 @@ To see a list of available resources we can use in our projects, visit
 npm install -g @angular/cli
 ```
 
+OR to upgrade the cli, use
+
+```bash
+npm install -g @angular/cli@latest
+```
+
 To check version of cli, we use
 
 ```bash
@@ -60,6 +66,12 @@ node -v
 ng new ProjectName --skip-tests true
 ```
 
+To see a list of files the ng new command will create without actually creating them, we can use
+
+```bash
+ng new ProjectName -d //d starts for dry run
+```
+
 **NOTE**: --skip-tests true was used to remove tests files but shouldn't be used for a proper project as you need tests files in your project
 
 After creation of project,
@@ -76,10 +88,28 @@ $ npm install ngx-bootstrap --save
 $ npm install bootstrap@3  --save
 ```
 
-Add botstrap to **angular.json** fileunder the styles section as shown below
+OR you could install bootstrap alongside jquery as
+
+```bash
+$ npm install bootstrap@3 jquery --save
+```
+
+Add bootstrap to **angular.json** file under the styles section as shown below
 
 ```json
-"node_modules/bootstrap/dist/css/bootstrap.min.css"
+"styles": [
+ "node_modules/bootstrap/dist/css/bootstrap.min.css",
+ "src/styles.css"
+]
+```
+
+To Add Jquery to **angular.json** file under the **scripts** section, we configure as shown below:
+
+```json
+"scripts": [
+   "node_modules/jquery/dist/jquery.min.js",
+  "node_modules/bootstrap/dist/js/bootstrap.min.js"
+]
 ```
 
 E.g To use a datepicker module from ngx-bootstrap, you can import it as follows
@@ -134,17 +164,12 @@ To modify the default configuration of datepicker, you import this into your com
 import { BsDatepickerConfig } from "ngx-bootstrap/datepicker";
 ```
 
-## Launch project with
-
-```bash
-ng serve -o
-```
-
 ## Generating a component
 
 ```bash
-// ng g c folderName/componentName --flat true //all starts in small letters and are in plural
-$ ng g c employees/listEmployees --flat true
+// ng g c folderName/componentName  --skip-tests=true --flat=true //all starts in small letters and are in plural
+$ ng g c employee/create-employee --skip-tests=true --flat=true
+//skip-tests=true is used to make sure a test file is not created. But shouldnt be used in a true project
 ```
 
 ## Property 'propertyName' has no initializer and is not definitely assigned in the constructor Error messages
@@ -194,6 +219,15 @@ imports: [
     RouterModule.forRoot(appRoutes), //pass your created routes here
     AppRoutingModule
   ],
+```
+
+## To launch the app
+
+```bash
+ng serve --open
+
+// OR
+ng s -o
 ```
 
 ## Making Links with RouterLink
@@ -2283,3 +2317,1320 @@ saveEmployee(): void {
       );
     }
 ```
+
+## Routing in different files
+
+Routing made in different files is better because of
+
+- Maintainability
+- separation of concerns
+
+To generate a route, we can use the command
+
+```bash
+ng g m app-routing --flat=true --module=app
+// create app-routing module and attach it to the module app
+```
+
+**NOTE**: The error router-outlet is not a known module is
+caused when RouterModule has not been imported in app.module.ts as it is the RouterModule that imports router-outlet.
+
+## Reactive forms(Model Driven forms)
+
+Classes for creating a form control tree in reactive forms:
+
+- FormGroup
+- FormControl
+
+STEPS
+
+- Import ReactiveFormsModule inside app.module.ts i.e
+
+```ts
+import { ReactiveFormsModule } from "@angular/forms";
+```
+
+- Add ReactiveFormsModule inside the imports section of app.module.ts
+
+```ts
+   imports: [
+    ReactiveFormsModule
+  ],
+```
+
+- Open the component.ts file that anages the template where the file is to be created and import FormGroup and FormControl e.g
+  create-employee.component.ts
+
+```ts
+import { FormGroup, FormControl } from "@angular/forms";
+```
+
+- initialize a variable in the component.ts file to hold an instance of FormGroup i.e
+
+```ts
+ employeeForm!: FormGroup;
+```
+
+- in ngOnInit function, create the contents of the form i.e
+
+```ts
+  ngOnInit(): void {
+    this.employeeForm = new FormGroup({
+      fullName: new FormControl(),
+      email: new FormControl()
+    })
+  }
+```
+
+- In the component.html file, create the html fields and link the form to the variable holding the FormGroup
+
+```html
+<form
+  class="form-horizontal"
+  [formGroup]="employeeForm"
+  (ngSubmit)="onSubmit()"
+>
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title">Create Employee</h3>
+    </div>
+
+    <div class="panel-body">
+      <div class="form-group">
+        <label for="fullname" class="control-label">Full Name</label>
+        <input
+          type="text"
+          id="fullname"
+          formControlName="fullname"
+          class="form-control"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="email" class="control-label">Email</label>
+        <input
+          type="text"
+          id="email"
+          formControlName="email"
+          class="form-control"
+        />
+      </div>
+    </div>
+    <div class="panel-footer">
+      <button type="submit" class="btn btn-primary">Save</button>
+    </div>
+  </div>
+</form>
+```
+
+**IMPORTANT**
+
+- The form is linked to the variable in the component.ts file as shown below
+
+```html
+<form
+  class="form-horizontal"
+  [formGroup]="employeeForm"
+  (ngSubmit)="onSubmit()"
+></form>
+<!--Note the usage here  [formGroup]="employeeForm". We linked the form to the instance in component.ts-->
+```
+
+- use formControlName to link each tag to its corresponding attribute in the controller i.e
+
+```html
+<div class="form-group">
+      <label for="email" class="control-label">Email</label>
+      <input
+        type="text"
+        id="email"
+        formControlName="email"
+        class="form-control"
+      />
+</div>
+ <!--Note the usage here formControlName="email" which corresponds to the email attribute in the component.ts file ->
+```
+
+**NOTES**
+
+- In a reactive form, we create instances of Formcontrol and Formgroup classes
+- Both FormControl and FormGroup classes nherit from AbstractControl base class
+- The Abstractcontrol class has properties that help us track both FormControl and FormGroup value and state.
+
+* FormControl tracks the value and state of an individaul html element.
+* FormGroup instance tracks the value and state of all the form controls in that group.
+  AbstractControl Properties: value, errors, valid, invalid, dirty, pristine, touched, untouched
+  AbstractControl Methods: setValidators(), clearValidators(), updateValueAndValidity(),
+  setValue(), patchValue(), reset()
+
+We can check the state of a form by using name of the form point the validation e.g
+employeeForm.touched, employeeForm.valid e.t.c
+
+## Accessing an individual html element
+
+We can access a formControl in a group by
+
+```ts
+employeeForm.controls.fullName.value;
+```
+
+OR
+
+```ts
+employeeForm.get("fullName").value;
+```
+
+## Nested formGroups
+
+In the example below, skills is created as a nested Formgroup
+
+```ts
+ngOnInit(): void {
+    this.employeeForm = new FormGroup({
+      fullname: new FormControl(),
+      email: new FormControl(),
+
+      //Skills as a nested formgroup
+      skills: new FormGroup({
+        skillName: new FormControl(),
+        experienceInYears: new FormControl(),
+        proficiency: new FormControl()
+      })
+    })
+  }
+```
+
+And in the component.html file, add the fields to correspond to the attributes in the component.ts file. Also make sure
+you bind them using formGroupName to bind to the name of the group and formControlName to bind to each attribute
+
+```html
+<!--Adding skills FormGroup-->
+<div formGroupName="skills">
+  <input type="text" id="skillName" formControlName="skillName" />
+
+  <input
+    type="text"
+    placeholder="experience in years"
+    formControlName="experienceInYears"
+  />
+
+  <div class="form-group">
+    <label>Proficiency</label>
+    <input
+      type="radio"
+      value="beginner"
+      formControlName="proficiency"
+    />Beginner
+    <input
+      type="radio"
+      value="intermediate"
+      formControlName="proficiency"
+    />intermediate
+    <input
+      type="radio"
+      value="advanced"
+      formControlName="proficiency"
+    />Advanced
+  </div>
+</div>
+```
+
+## SetValue() and PatchValue()
+
+We can populate html element fields using setValue() or patchValue() as shown below
+
+```ts
+ onLoadDataClick(): void {
+    this.employeeForm.setValue({
+      fullname: "kingsley",
+      email: "k@gmail.com",
+      skills: {
+        skillName: "C#",
+        experienceInYears: 5,
+        proficiency: 'beginner'
+      }
+    })
+  }
+```
+
+We use setValue() when we want to update all the fields but we use patchValue() when we want to update some values
+but not all or we still can use it to update all the values.
+E.g
+
+```ts
+ onLoadDataClick(): void {
+    this.employeeForm.patchValue({
+      fullname: "kingsley",
+      email: "k@gmail.com",
+    })
+  }
+```
+
+## FormBuilder class
+
+Another way of creating a reactive form is using a formbuilder. It reduces the number of codes needed to build a reactive form. FormBuilder has 3 methods:
+
+- control()
+- array()
+- group()
+
+To build a form using formbuilder, follow the steps below:
+
+- Import FormBuilder and FormGroup as shown below
+
+```ts
+import { FormGroup, FormControl, FormBuilder } from "@angular/forms";
+```
+
+- inject the formBuilder in your constructor as FormBuilder is a service
+
+```ts
+constructor(private fb: FormBuilder){}
+```
+
+- Create the fields needed for the form
+
+```ts
+  ngOnInit(): void {
+    this.employeeForm = this.fb.group({
+      fullName: [''],
+      email: [''],
+      skills: this.fb.group({
+        skillName: [''],
+        experienceInYears: [''],
+        proficiency: ['']
+      })
+    })
+  }
+```
+
+- The first parameter in the FormBuilder is the value by default. From above we used ''.
+- The second parameter is for synchronous validations
+- The third parameter is for asynchronous validations.
+  Therefore to set a default value, we can add the default value inbetween the quotes i.e i added a
+  default email as shown below
+
+```ts
+  ngOnInit(): void {
+    this.employeeForm = this.fb.group({
+      fullName: [''],
+      email: ['k@gmail.com'],
+      skills: this.fb.group({
+        skillName: [''],
+        experienceInYears: [''],
+        proficiency: ['']
+      })
+    })
+  }
+```
+
+## Reactive Forms Validations
+
+Steps
+
+- Import the validators class
+
+```ts
+import { FormGroup, FormBuilder, Validators } from "@angular/forms";
+```
+
+Validators have some inbuilt functions e.g
+
+- required
+- requiredTrue: mostly used on a required checkbox e.g agree terms and conditions checkbox
+
+* email: checks that the field contains an email
+* pattern: checks that the field matches a given pattern
+* min
+* max
+* minLength: for a minimum number of characters
+* maxLength: for a maxlength of character
+  Example code:
+
+```ts
+this.employeeForm = this.fb.group({
+  fullname: [
+    "",
+    [Validators.required, Validators.minLength(2), Validators.maxLength(9)],
+  ],
+  email: [""],
+  skills: this.fb.group({
+    skillName: [""],
+    experienceInYears: [""],
+    proficiency: [""],
+  }),
+});
+```
+
+below is the component.html code to manage the error
+
+```html
+<form
+  class="form-horizontal"
+  [formGroup]="employeeForm"
+  (ngSubmit)="onSubmit()"
+>
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title">Create Employee</h3>
+    </div>
+
+    <div class="panel-body">
+      <div
+        class="form-group"
+        [ngClass]="{
+          'has-error':
+            employeeForm.get('fullname').invalid &&
+            employeeForm.get('fullname').touched
+        }"
+      >
+        <label for="fullname" class="control-label">Full Name</label>
+        <input
+          type="text"
+          id="fullname"
+          formControlName="fullname"
+          class="form-control"
+        />
+        <span
+          class="help-block"
+          *ngIf="
+            employeeForm.get('fullname').errors &&
+            (employeeForm.get('fullname').touched ||
+              employeeForm.get('fullname').dirty)
+          "
+        >
+          <span
+            *ngIf="
+              employeeForm.get('fullname').hasError('required') &&
+              employeeForm.get('fullname').touched
+            "
+          >
+            Full name is required
+          </span>
+          <span
+            *ngIf="
+              employeeForm.get('fullname').hasError('minlength') ||
+              employeeForm.get('fullname').hasError('maxlength')
+            "
+          >
+            Full name must be greater than 2 characters and less than 10
+            characters
+          </span>
+        </span>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <div class="btn-toolbar">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="onLoadDataClick()"
+        >
+          Load Data
+        </button>
+      </div>
+    </div>
+  </div>
+</form>
+```
+
+Note the use of hasError('minlength), hasError('maxlength) and hasError('required') to check if the errors occured for these keys.
+You can visit the link below for more explanation:
+[stackoverflow](https://stackoverflow.com/questions/46129719/angular-4-form-validators-minlength-maxlength-does-not-work-on-field-type-nu)
+
+## Monitor FormControl valuechanges
+
+valueChanges property is an observable that is found in AbstractControl and since FormControl and FormGroup are instances of AbstractControl, they can inherit this valueChanges property of Abstractcontrol.
+To react to this valueChanges property, we have to subscribe to it since it's an observable.
+Example:
+
+```ts
+this.employeeForm.get("fullname")?.valueChanges.subscribe((value: string) => {
+  console.log(value);
+});
+
+//Or for formGroup
+this.employeeForm.valueChanges.subscribe((value: any) => {
+  console.log(JSON.stringify(value));
+});
+```
+
+## Looping through FormControls
+
+This helps us to
+
+- Reset formcontrols
+- Enable or disable all formcontrols
+- Set and clear validators
+- Mark formcontrols as dirty, touched e.t.c
+- Move validation to the component class
+
+To retrieve all the keys of a form, we use Object.keys() method.
+We use this looping mehod to go through all the controls of a form and apply changes to all of the them. like disabling all of the form controls on button click e.g
+
+```ts
+logKeyValuePairs(group: FormGroup): void {
+    //console.log(Object.keys(group.controls));
+  Object.keys(group.controls).forEach((key: string) => {
+        const abstractControl = group.get(key);
+        if(abstractControl instanceof FormGroup) {
+          // Used to recursively call the function so it handles nested formgroup
+          this.logKeyValuePairs(abstractControl);
+        } else {
+          console.log('key = ' + key + " Value = " + abstractControl?.value);
+          abstractControl?.disable; // used to disable the controls after looping through them
+        }
+    })
+  }
+
+  onLoadDataClick(): void {
+    this.logKeyValuePairs(this.employeeForm);
+  }
+```
+
+## Move Validation meassages to the component class in a reactive form
+
+### STEPS
+
+- Define an object that holds all the errors to be shown on your form. Here i call the object validationMessages
+
+```ts
+validationMessages: any = {
+  fullname: {
+    required: "Full name is required.",
+    minlength: "Full name must be greater than or equal to 2 characters.",
+    maxlength: "Full name must be less than 10 characters",
+  },
+  email: {
+    required: "Email is required.",
+  },
+  skillName: {
+    required: "SkillName is required",
+  },
+  experienceInYears: {
+    required: "experience is required",
+  },
+  proficiency: {
+    required: "proficiency is required",
+  },
+};
+```
+
+- Define another object that will hold only the errors that actually occured. It is to this object that our form will be binded to. Here i call it formErrors
+
+```ts
+formErrors: any = {
+  fullname: "",
+  email: "",
+  skillName: "",
+  experienceInYears: "",
+  proficiency: "",
+};
+```
+
+- Loop throug the formcontrols and save the controls with errors in forerrors object
+
+```ts
+ logValidationErrors(group: FormGroup = this.employeeForm): void {
+    //console.log(Object.keys(group.controls));
+    Object.keys(group.controls).forEach((key: string) => {
+        const abstractControl = group.get(key);
+        if(abstractControl instanceof FormGroup) {
+          // Used to recursively call the function so it handles nested formgroup
+          this.logValidationErrors(abstractControl);
+          //abstractControl?.disable;// if i call it here, it disables only the controls in the nested form
+        } else {
+          //console.log('key = ' + key + " Value = " + abstractControl?.value);
+         // abstractControl?.disable; // when used  here it disables all the controls in the form
+         this.formErrors[key] = ''; // clear existing errors
+         if(abstractControl && !abstractControl.valid && (abstractControl.touched || abstractControl.dirty)) {
+           const messages = this.validationMessages[key];
+           //console.log(messages);
+           //console.log(abstractControl.errors);
+           for (const errorKey in abstractControl.errors) {
+             if(errorKey) {
+               this.formErrors[key] += messages[errorKey] + ' ';
+             }
+           }
+         }
+        }
+    })
+  }
+
+ /*  onLoadDataClick(): void {
+    this.logValidationErrors(this.employeeForm);
+    console.log(this.formErrors);
+  } */
+```
+
+## Move Validation Logic to the component class in a reactive form
+
+### STEPS
+
+- write valueChanges method inside the ngOnInit() method as shown below
+
+```ts
+ ngOnInit(): void {
+    // Using FormBuilder approach
+    this.employeeForm = this.fb.group({
+      fullname: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(9)]],
+      email: ['', Validators.required],
+      skills: this.fb.group({
+        skillName: ['', Validators.required],
+        experienceInYears: ['', Validators.required],
+        proficiency: ['', Validators.required]
+      })
+    });
+
+  // This is where we call dynamically the validation logic
+    this.employeeForm.valueChanges.subscribe((data) => {
+      this.logValidationErrors(this.employeeForm);
+    })
+
+  }
+```
+
+- Bind to formErrors object in the component.html file as shown below
+
+```html
+<form
+  class="form-horizontal"
+  [formGroup]="employeeForm"
+  (ngSubmit)="onSubmit()"
+>
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title">Create Employee</h3>
+    </div>
+
+    <div class="panel-body">
+      <div class="form-group" [ngClass]="{ 'has-error': formErrors.fullname }">
+        <label for="fullname" class="control-label">Full Name</label>
+        <input
+          type="text"
+          id="fullname"
+          formControlName="fullname"
+          class="form-control"
+          (blur)="logValidationErrors()"
+        />
+        <label>{{ fullnameLength }}</label>
+        <span class="help-block" *ngIf="formErrors.fullname">
+          {{ formErrors.fullname }}
+        </span>
+      </div>
+
+      <div class="form-group" [ngClass]="{ 'has-error': formErrors.email }">
+        <label for="email" class="control-label">Email</label>
+        <input
+          type="text"
+          id="email"
+          formControlName="email"
+          class="form-control"
+          (blur)="logValidationErrors()"
+        />
+        <span class="help-block" *ngIf="formErrors.email">
+          {{ formErrors.email }}
+        </span>
+      </div>
+
+      <!--Adding skills FormGroup-->
+      <div class="well">
+        <div
+          formGroupName="skills"
+          [ngClass]="{ 'has-error': formErrors.skillName }"
+        >
+          <input
+            type="text"
+            id="skillName"
+            formControlName="skillName"
+            (blur)="logValidationErrors()"
+            placeholder="Name"
+            style="margin-right: 10px"
+          />
+          <span class="help-block" *ngIf="formErrors.skillName">
+            {{ formErrors.skillName }}
+          </span>
+
+          <input
+            type="text"
+            placeholder="Experience in years"
+            formControlName="experienceInYears"
+            (blur)="logValidationErrors()"
+          />
+          <span class="help-block" *ngIf="formErrors.experienceInYears">
+            {{ formErrors.experienceInYears }}
+          </span>
+
+          <div
+            class="form-group"
+            [ngClass]="{ 'has-error': formErrors.proficiency }"
+          >
+            <label>Proficiency</label>
+            <input
+              type="radio"
+              value="beginner"
+              formControlName="proficiency"
+              (blur)="logValidationErrors()"
+              style="margin-left: 8px; margin-right: 4px"
+            />Beginner
+            <input
+              type="radio"
+              value="intermediate"
+              formControlName="proficiency"
+              (blur)="logValidationErrors()"
+              style="margin-left: 8px; margin-right: 4px"
+            />intermediate
+            <input
+              type="radio"
+              value="advanced"
+              formControlName="proficiency"
+              (blur)="logValidationErrors()"
+              style="margin-left: 8px; margin-right: 4px"
+            />Advanced
+          </div>
+          <span class="help-block" *ngIf="formErrors.proficiency">
+            {{ formErrors.proficiency }}
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <div class="btn-toolbar">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="onLoadDataClick()"
+        >
+          Load Data
+        </button>
+      </div>
+    </div>
+  </div>
+</form>
+```
+
+## Dynamically adding or removing validators in a reactive form
+
+Here we use these methods of AbstractControl to achieve our aim
+
+- setValidators()
+- clearValidators()
+- updateValueAndValidity()
+
+```ts
+
+import { FormGroup, FormControl, FormBuilder, Validators } from '@angular/forms';
+  employeeForm!: FormGroup;
+
+  validationMessages: any = {
+    'fullname': {
+      'required': 'Full name is required.',
+      'minlength': 'Full name must be greater than or equal to 2 characters.',
+      'maxlength': 'Full name must be less than 10 characters'
+    },
+    'email': {
+      'required': 'Email is required.'
+    },
+    'phone': {
+      'required': 'Phone is required.'
+    },
+    'skillName': {
+      'required': 'SkillName is required'
+    },
+    'experienceInYears': {
+      'required': 'experience is required'
+    },
+    'proficiency': {
+      'required': 'proficiency is required'
+    }
+  };
+
+  formErrors: any = {
+    'fullname': '',
+    'email': '',
+    'skillName': '',
+    'experienceInYears': '',
+    'proficiency': ''
+  };
+
+  constructor(private fb: FormBuilder) { }
+
+  ngOnInit(): void {
+    // Using FormBuilder approach
+    this.employeeForm = this.fb.group({
+      fullname: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(9)]],
+      email: ['', Validators.required],
+      contactPreference: ['email'],
+      phone: [''],
+      skills: this.fb.group({
+        skillName: ['', Validators.required],
+        experienceInYears: ['', Validators.required],
+        proficiency: ['', Validators.required]
+      })
+    });
+
+    this.employeeForm.get("fullname")?.valueChanges.subscribe(
+      (value: string) => {
+        //console.log(value);
+        this.fullnameLength = value.length;
+      }
+    );
+
+    this.employeeForm.valueChanges.subscribe((data) => {
+      this.logValidationErrors(this.employeeForm);
+    })
+
+  }
+
+onContactPreferenceChange(selectedValue: string) {
+    const phoneControl = this.employeeForm.get('phone');
+    if(selectedValue === 'phone') {
+      phoneControl?.setValidators(Validators.required);
+      //multiple validators can be set as shown below
+      // phoneControl?.setValidators([Validators.required, Validators.maxLength(8)]);
+    } else {
+      phoneControl?.clearValidators();
+    }
+
+    phoneControl?.updateValueAndValidity(); // This triggers the form validation
+  }
+```
+
+And the html code looks like
+
+```html
+<form
+  class="form-horizontal"
+  [formGroup]="employeeForm"
+  (ngSubmit)="onSubmit()"
+>
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title">Create Employee</h3>
+    </div>
+
+    <div class="panel-body">
+      <div class="form-group" [ngClass]="{ 'has-error': formErrors.fullname }">
+        <label for="fullname" class="control-label">Full Name</label>
+        <input
+          type="text"
+          id="fullname"
+          formControlName="fullname"
+          class="form-control"
+          (blur)="logValidationErrors()"
+        />
+        <label>{{ fullnameLength }}</label>
+        <span class="help-block" *ngIf="formErrors.fullname">
+          {{ formErrors.fullname }}
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label class="control-label col-md-2">Contact Preference</label>
+        <div class="col-md-8" style="display: inline-block">
+          <input
+            type="radio"
+            value="email"
+            formControlName="contactPreference"
+            (click)="onContactPreferenceChange('email')"
+            style="margin-left: 8px; margin-right: 4px"
+          />Email
+
+          <input
+            type="radio"
+            value="phone"
+            formControlName="contactPreference"
+            (click)="onContactPreferenceChange('phone')"
+            style="margin-left: 8px; margin-right: 4px"
+          />Phone
+        </div>
+        <span class="help-block" *ngIf="formErrors.proficiency">
+          {{ formErrors.proficiency }}
+        </span>
+      </div>
+
+      <div class="form-group" [ngClass]="{ 'has-error': formErrors.email }">
+        <label for="email" class="control-label">Email</label>
+        <input
+          type="text"
+          id="email"
+          formControlName="email"
+          class="form-control"
+          (blur)="logValidationErrors()"
+        />
+        <span class="help-block" *ngIf="formErrors.email">
+          {{ formErrors.email }}
+        </span>
+      </div>
+
+      <div class="form-group" [ngClass]="{ 'has-error': formErrors.phone }">
+        <label for="phone" class="control-label">Phone</label>
+        <input
+          type="text"
+          id="phone"
+          formControlName="phone"
+          class="form-control"
+          (blur)="logValidationErrors()"
+        />
+        <span class="help-block" *ngIf="formErrors.phone">
+          {{ formErrors.phone }}
+        </span>
+      </div>
+
+      <!--Adding skills FormGroup-->
+      <div class="well">
+        <div
+          formGroupName="skills"
+          [ngClass]="{ 'has-error': formErrors.skillName }"
+        >
+          <input
+            type="text"
+            id="skillName"
+            formControlName="skillName"
+            (blur)="logValidationErrors()"
+            placeholder="Name"
+            style="margin-right: 10px"
+          />
+          <span class="help-block" *ngIf="formErrors.skillName">
+            {{ formErrors.skillName }}
+          </span>
+
+          <input
+            type="text"
+            placeholder="Experience in years"
+            formControlName="experienceInYears"
+            (blur)="logValidationErrors()"
+          />
+          <span class="help-block" *ngIf="formErrors.experienceInYears">
+            {{ formErrors.experienceInYears }}
+          </span>
+
+          <div
+            class="form-group"
+            [ngClass]="{ 'has-error': formErrors.proficiency }"
+          >
+            <label>Proficiency</label>
+            <input
+              type="radio"
+              value="beginner"
+              formControlName="proficiency"
+              (blur)="logValidationErrors()"
+              style="margin-left: 8px; margin-right: 4px"
+            />Beginner
+            <input
+              type="radio"
+              value="intermediate"
+              formControlName="proficiency"
+              (blur)="logValidationErrors()"
+              style="margin-left: 8px; margin-right: 4px"
+            />intermediate
+            <input
+              type="radio"
+              value="advanced"
+              formControlName="proficiency"
+              (blur)="logValidationErrors()"
+              style="margin-left: 8px; margin-right: 4px"
+            />Advanced
+          </div>
+          <span class="help-block" *ngIf="formErrors.proficiency">
+            {{ formErrors.proficiency }}
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <div class="btn-toolbar">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="onLoadDataClick()"
+        >
+          Load Data
+        </button>
+      </div>
+    </div>
+  </div>
+</form>
+```
+
+Instaed of using a click event on the form to call the onContactPreference Change method,
+we can use valueChanges method to realise it as shown below: The changes are monitored with valueChanges method inside the ngOnInit() method.
+
+```ts
+ngOnInit(): void {
+    // Using FormBuilder approach
+    this.employeeForm = this.fb.group({
+      fullname: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(9)]],
+      email: ['', Validators.required],
+      contactPreference: ['email'],
+      phone: [''],
+      skills: this.fb.group({
+        skillName: ['', Validators.required],
+        experienceInYears: ['', Validators.required],
+        proficiency: ['', Validators.required]
+      })
+    });
+
+    this.employeeForm.get("fullname")?.valueChanges.subscribe(
+      (value: string) => {
+        //console.log(value);
+        this.fullnameLength = value.length;
+      }
+    );
+
+    // This monitors the changes to contactPreference fields of either email or phone
+    this.employeeForm.get('contactPreference')?.valueChanges.subscribe((data: string) => {
+      this.onContactPreferenceChange(data);
+    });
+
+    this.employeeForm.valueChanges.subscribe((data) => {
+      this.logValidationErrors(this.employeeForm);
+    })
+
+  }
+
+  onSubmit(): void {
+    console.log(this.employeeForm.value);
+    console.log(this.employeeForm.controls.fullname.value);
+    console.log(this.employeeForm.get('email')?.dirty);
+    console.log(this.employeeForm.touched);
+  }
+
+  logValidationErrors(group: FormGroup = this.employeeForm): void {
+    //console.log(Object.keys(group.controls));
+    Object.keys(group.controls).forEach((key: string) => {
+        const abstractControl = group.get(key);
+        if(abstractControl instanceof FormGroup) {
+          // Used to recursively call the function so it handles nested formgroup
+          this.logValidationErrors(abstractControl);
+          //abstractControl?.disable;// if i call it here, it disables only the controls in the nested form
+        } else {
+          //console.log('key = ' + key + " Value = " + abstractControl?.value);
+         // abstractControl?.disable; // when used  here it disables all the controls in the form
+         this.formErrors[key] = ''; // clear existing errors
+         if(abstractControl && !abstractControl.valid && (abstractControl.touched || abstractControl.dirty)) {
+           const messages = this.validationMessages[key];
+           //console.log(messages);
+           //console.log(abstractControl.errors);
+           for (const errorKey in abstractControl.errors) {
+             if(errorKey) {
+               this.formErrors[key] += messages[errorKey] + ' ';
+             }
+           }
+         }
+        }
+    })
+  }
+
+  onLoadDataClick(): void {
+    this.logValidationErrors(this.employeeForm);
+    console.log(this.formErrors);
+  }
+
+  onContactPreferenceChange(selectedValue: string) {
+    const phoneControl = this.employeeForm.get('phone');
+    if(selectedValue === 'phone') {
+      phoneControl?.setValidators(Validators.required);
+      //multiple validators can be set as shown below
+      // phoneControl?.setValidators([Validators.required, Validators.maxLength(8)]);
+    } else {
+      phoneControl?.clearValidators();
+    }
+
+    phoneControl?.updateValueAndValidity(); // This triggers the form validation
+  }
+```
+
+And we delete the click method from the html file. The form is shown below
+
+```html
+<form
+  class="form-horizontal"
+  [formGroup]="employeeForm"
+  (ngSubmit)="onSubmit()"
+>
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title">Create Employee</h3>
+    </div>
+
+    <div class="panel-body">
+      <div class="form-group" [ngClass]="{ 'has-error': formErrors.fullname }">
+        <label for="fullname" class="control-label">Full Name</label>
+        <input
+          type="text"
+          id="fullname"
+          formControlName="fullname"
+          class="form-control"
+          (blur)="logValidationErrors()"
+        />
+        <label>{{ fullnameLength }}</label>
+        <span class="help-block" *ngIf="formErrors.fullname">
+          {{ formErrors.fullname }}
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label class="control-label col-md-2">Contact Preference</label>
+        <div class="col-md-8" style="display: inline-block">
+          <input
+            type="radio"
+            value="email"
+            formControlName="contactPreference"
+            style="margin-left: 8px; margin-right: 4px"
+          />Email
+
+          <input
+            type="radio"
+            value="phone"
+            formControlName="contactPreference"
+            style="margin-left: 8px; margin-right: 4px"
+          />Phone
+        </div>
+        <span class="help-block" *ngIf="formErrors.proficiency">
+          {{ formErrors.proficiency }}
+        </span>
+      </div>
+
+      <div class="form-group" [ngClass]="{ 'has-error': formErrors.email }">
+        <label for="email" class="control-label">Email</label>
+        <input
+          type="text"
+          id="email"
+          formControlName="email"
+          class="form-control"
+          (blur)="logValidationErrors()"
+        />
+        <span class="help-block" *ngIf="formErrors.email">
+          {{ formErrors.email }}
+        </span>
+      </div>
+
+      <div class="form-group" [ngClass]="{ 'has-error': formErrors.phone }">
+        <label for="phone" class="control-label">Phone</label>
+        <input
+          type="text"
+          id="phone"
+          formControlName="phone"
+          class="form-control"
+          (blur)="logValidationErrors()"
+        />
+        <span class="help-block" *ngIf="formErrors.phone">
+          {{ formErrors.phone }}
+        </span>
+      </div>
+
+      <!--Adding skills FormGroup-->
+      <div class="well">
+        <div
+          formGroupName="skills"
+          [ngClass]="{ 'has-error': formErrors.skillName }"
+        >
+          <input
+            type="text"
+            id="skillName"
+            formControlName="skillName"
+            (blur)="logValidationErrors()"
+            placeholder="Name"
+            style="margin-right: 10px"
+          />
+          <span class="help-block" *ngIf="formErrors.skillName">
+            {{ formErrors.skillName }}
+          </span>
+
+          <input
+            type="text"
+            placeholder="Experience in years"
+            formControlName="experienceInYears"
+            (blur)="logValidationErrors()"
+          />
+          <span class="help-block" *ngIf="formErrors.experienceInYears">
+            {{ formErrors.experienceInYears }}
+          </span>
+
+          <div
+            class="form-group"
+            [ngClass]="{ 'has-error': formErrors.proficiency }"
+          >
+            <label>Proficiency</label>
+            <input
+              type="radio"
+              value="beginner"
+              formControlName="proficiency"
+              (blur)="logValidationErrors()"
+              style="margin-left: 8px; margin-right: 4px"
+            />Beginner
+            <input
+              type="radio"
+              value="intermediate"
+              formControlName="proficiency"
+              (blur)="logValidationErrors()"
+              style="margin-left: 8px; margin-right: 4px"
+            />intermediate
+            <input
+              type="radio"
+              value="advanced"
+              formControlName="proficiency"
+              (blur)="logValidationErrors()"
+              style="margin-left: 8px; margin-right: 4px"
+            />Advanced
+          </div>
+          <span class="help-block" *ngIf="formErrors.proficiency">
+            {{ formErrors.proficiency }}
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <div class="btn-toolbar">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="onLoadDataClick()"
+        >
+          Load Data
+        </button>
+      </div>
+    </div>
+  </div>
+</form>
+```
+
+## Creating an using a Custom Validator in a Reactive Form
+
+### STEPS
+
+- Create the customer validation function
+  This is created inside the component.ts file but it should be created outside the closing tag of the component so it is a separate function. E.g
+
+  ```ts
+  //The return type is null when there is no error but an object of key value pairs when there is error
+  function emailDomain(
+    control: AbstractControl
+  ): { [key: string]: any } | null {
+    const email: string = control.value;
+    const domain = email.substring(email.lastIndexOf("@") + 1);
+    if (email === "" || domain.toLowerCase() === "king.com") {
+      //return null here when there is no error
+      return null;
+    } else {
+      //return an object here with key value pairs as shown below
+      return { emailDomain: true };
+    }
+  }
+  ```
+
+* Attach the custom validator to the control you want to validate e.g
+
+```ts
+  email: ['', [Validators.required, emailDomain]],
+  //Note that the function emailDomain is attached to email without using the this keyword as the
+  // function is outside the class component
+```
+
+- Attach the key of the error to the validationMessages object for the correct control and add a message value that will be displayed to the key . Here we chose the key
+  emailDomain in the emailDomain function, so we attach in validationMessages giving it the string value
+  "Email domain should be king.com" as is shown below:
+
+```ts
+validationMessages: any = {
+  email: {
+    required: "Email is required.",
+    emailDomain: "Email domain should be king.com",
+  },
+};
+```
+
+## Creating Custom Validator with Parameter
+
+### STEPS
+
+The difference here is we refactor the code above to use closure and make the function able to accept parameters.
+
+- Create the customer validation function
+  This is created inside the component.ts file but it should be created outside the closing tag of the component so it is a separate function. E.g
+
+  ```ts
+  //The return type is null when there is no error but an object of key value pairs when there is error
+  function emailDomain(domainName: string) {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+      const email: string = control.value;
+      const domain = email.substring(email.lastIndexOf("@") + 1);
+      if (email === "" || domain.toLowerCase() === domainName.toLowerCase()) {
+        return null;
+      } else {
+        return { emailDomain: true };
+      }
+    };
+  }
+  ```
+
+````
+
+* Attach the custom validator to the control you want to validate e.g
+
+```ts
+  //Pass the required attribute to the function when it is called E.g "king.com"
+  email: ['', [Validators.required, emailDomain('king.com')]],
+  //Note that the function emailDomain is attached to email without using the this keyword as the
+  // function is outside the class component
+````
+
+- Attach the key of the error to the validationMessages object for the correct control and add a message value that will be displayed to the key . Here we chose the key
+  emailDomain in the emailDomain function, so we attach in validationMessages giving it the string value
+  "Email domain should be king.com" as is shown below:
+
+```ts
+validationMessages: any = {
+  email: {
+    required: "Email is required.",
+    emailDomain: "Email domain should be king.com",
+  },
+};
+```
+
+## Making a custom validator function reusable
+
+### STEPS
+
+We will cut out the code from the component.ts file and refactor it in a separate file.
+
+- Create a folder in your app called shared.
+- Create a file in the shared folder e.g custom.validator.ts
+- Add your validation code inside this file and make the function static with the static keyword e.g
+  custom.validators.ts
+
+```ts
+import { AbstractControl } from "@angular/forms";
+export class CustomValidators {
+  static emailDomain(domainName: string) {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+      const email: string = control.value;
+      const domain = email.substring(email.lastIndexOf("@") + 1);
+      if (email === "" || domain.toLowerCase() === domainName.toLowerCase()) {
+        return null;
+      } else {
+        return { emailDomain: true };
+      }
+    };
+  }
+}
+```
+
+- In the component.ts file where we want to use this custom validator, import the custom validator as shown below:
+
+```ts
+import { CustomValidators } from "./../shared/custom.validators";
+```
+
+- Then to use it, we can reference the CustomValidators we just imported and reference the function in it that we want to use as shown below:
+
+```ts
+email: ['', [Validators.required, CustomValidators.emailDomain('king.com')]],
+```
+
+Here we refeenced CustomValidators and then emailDomain() function inside it.
