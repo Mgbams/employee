@@ -3633,4 +3633,4 @@ import { CustomValidators } from "./../shared/custom.validators";
 email: ['', [Validators.required, CustomValidators.emailDomain('king.com')]],
 ```
 
-Here we refeenced CustomValidators and then emailDomain() function inside it.
+Here we referenced CustomValidators and then emailDomain() function inside it.
